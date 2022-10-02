@@ -7,8 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build",
     "start": "node dist/index.js",
-    "buildAndStart": "npm run build && npm run start",
-    "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
+    "build-start": "npm run build && npm run start",
+    "lint": "eslint --ignore-path .gitignore --fix --ext .js,.ts .",
     "format": "prettier --ignore-path .gitignore -w .",
     "lint-format": "npm run lint && npm run format",
     "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts"
@@ -43,6 +43,7 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "pre-commit": "^1.2.2",
     "prettier": "^2.7.1",
     "ts-node-dev": "^2.0.0",
