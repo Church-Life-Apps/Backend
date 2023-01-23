@@ -13,6 +13,7 @@ app.use(express.static(path.resolve(__dirname, '../web-build')));
 
 const PORT = process.env.PORT || 3000;
 
+
 app.get('/hi', (req, res) => {
   res.status(200).send('hello');
 });
