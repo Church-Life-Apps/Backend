@@ -13,9 +13,6 @@
     "lint-format": "npm run lint && npm run format",
     "dev": "ts-node-dev --respawn --pretty --transpile-only src/index.ts"
   },
-  "pre-commit": [
-    "lint-format"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Church-Life-Apps/Backend.git"

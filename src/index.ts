@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
+import * as path from 'path';
 
 dotenv.config();
 
@@ -8,11 +9,16 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.static(path.resolve(__dirname, '../web-build')));
 
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 8080;
 
 app.get('/hi', (req, res) => {
   res.status(200).send('hello');
+});
+
+app.get('*', function (request, response) {
+  response.sendFile(path.resolve(__dirname, '../web-build', 'index.html'));
 });
 
 app.listen(PORT, () => {
