@@ -18,9 +18,11 @@ app.get('/hi', (req, res) => {
   res.status(200).send('hello');
 });
 
-app.get('/db', (req, res) => {
-  queryDb();
-  res.status(200).send('db');
+app.get('/db', async (req, res) => {
+  queryDb()
+    .then((val) => {
+        res.status(200).send(val);
+    });
 });
 
 app.get('*', function (request, response) {
