@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import * as path from 'path';
-import queryDb from './db/SongsDb';
 
 dotenv.config();
 
@@ -16,11 +15,6 @@ const PORT = process.env.PORT || 3000;
 
 app.get('/hi', (req, res) => {
   res.status(200).send('hello');
-});
-
-app.get('/db', (req, res) => {
-  queryDb();
-  res.status(200).send('db');
 });
 
 app.get('*', function (request, response) {
