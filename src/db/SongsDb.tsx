@@ -8,10 +8,12 @@ console.log("env var pass = " + process.env.PG_PASSWORD);
 console.log("env var data = " + process.env.PG_DATABASE);
 console.log("env var environment = " + process.env.ENVIRONMENT);
 
-// const ssl = process.env.ENVIRONMENT === 'local' ? 
-//     { 
-//         ca: fs.readFileSync(process.env.CA_CERT_FILEPATH ?? "").toString()
-//     } : {};
+const ssl = process.env.ENVIRONMENT == 'local' ? 
+    { 
+        ca: fs.readFileSync(process.env.CA_CERT_FILEPATH ?? "").toString()
+    } : {
+        ca: process.env.DB_CERT
+    };
 
 const pool = new Pool({
     host: process.env.PG_HOST,
@@ -19,8 +21,7 @@ const pool = new Pool({
     user: process.env.PG_USER,
     password: process.env.PG_PASSWORD,
     database: process.env.PG_DATABASE,
-    ssl: true,
-    // ssl: {}
+    ssl: ssl
 });
 
 export default async function querySongs() {
