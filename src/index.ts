@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import * as path from 'path';
-import queryDb from './db/SongsDb';
+import { querySongbooks } from './db/SongsDb';
 
 dotenv.config();
 
@@ -19,7 +19,7 @@ app.get('/hi', (req, res) => {
 });
 
 app.get('/db', async (req, res) => {
-  queryDb()
+  querySongbooks()
     .then((val) => {
         res.status(200).send(val);
     });
