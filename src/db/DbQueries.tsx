@@ -29,6 +29,7 @@ export const QUERY_INSERT_SONGBOOK = `
         title varchar(500) NOT NULL,
         author varchar(500) NOT NULL,
         music varchar(500) NOT NULL,
+        presentation_order text NOT NULL,
         image_url text NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL,
@@ -47,10 +48,9 @@ export const QUERY_INSERT_SONGBOOK = `
 
 /* export */ const QUERY_CREATE_LYRICS_TABLE = `
     CREATE TABLE IF NOT EXISTS lyrics (
-        song_id uuid NOT NULL,
+        song_id uuid NOT NULL REFERENCES songs(id),
         lyric_type lyric_type NOT NULL,
         verse_number integer NOT NULL,
-        presentation_order integer NOT NULL,
         lyrics text NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL,
