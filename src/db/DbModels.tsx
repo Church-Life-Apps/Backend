@@ -19,6 +19,7 @@ interface DbSong {
   title: string;
   author: string;
   music: string;
+  presentationOrder: string;
   imageUrl: String;
 }
 
@@ -35,7 +36,6 @@ interface DbLyric {
   songId: typeof uuidv4;
   lyricType: LyricType;
   verseNumber: number;
-  presentationOrder: number;
   lyrics: string;
 }
 
