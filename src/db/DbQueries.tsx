@@ -3,12 +3,12 @@
  */
 
 // Normal Queries
-export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`
+export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`;
 
 export const QUERY_INSERT_SONGBOOK = `
     INSERT INTO songbooks 
     VALUES(%s, %s, %s, now(), now());
-`.trim()
+`.trim();
 
 // One-time queries below this line! Keep here just for reference, but never call these :)
 /* export */ const QUERY_CREATE_SONGBOOKS_TABLE = `
@@ -19,7 +19,7 @@ export const QUERY_INSERT_SONGBOOK = `
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL
     );
-`.trim()
+`.trim();
 
 /* export */ const QUERY_CREATE_SONGS_TABLE = `
     CREATE TABLE IF NOT EXISTS songs (
@@ -34,26 +34,26 @@ export const QUERY_INSERT_SONGBOOK = `
         updated_dt timestamptz NOT NULL,
         UNIQUE(songbook_id, number)
     );
-`.trim()
+`.trim();
 
-/* export */ const QUERY_CREATE_VERSE_TYPE_ENUM = `
-    CREATE TYPE verse_type as ENUM (
-        'VERSE_TYPE_VERSE',
-        'VERSE_TYPE_PRECHORUS',
-        'VERSE_TYPE_CHORUS',
-        'VERSE_TYPE_BRIDGE'
+/* export */ const QUERY_CREATE_LYRIC_TYPE_ENUM = `
+    CREATE TYPE lyric_type as ENUM (
+        'LYRIC_TYPE_VERSE',
+        'LYRIC_TYPE_PRECHORUS',
+        'LYRIC_TYPE_CHORUS',
+        'LYRIC_TYPE_BRIDGE'
     );
-`.trim()
+`.trim();
 
 /* export */ const QUERY_CREATE_LYRICS_TABLE = `
     CREATE TABLE IF NOT EXISTS lyrics (
         song_id uuid NOT NULL,
-        verse_type verse_type NOT NULL,
+        lyric_type lyric_type NOT NULL,
         verse_number integer NOT NULL,
         presentation_order integer NOT NULL,
         lyrics text NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL,
-        PRIMARY KEY (song_id, verse_type, verse_number)
+        PRIMARY KEY (song_id, lyric_type, verse_number)
     );
-`.trim()
+`.trim();
