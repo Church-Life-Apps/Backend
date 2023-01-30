@@ -5,14 +5,15 @@
 import {v4 as uuidv4} from 'uuid';
 
 // Data object for Songbooks table
-interface DbSongbook {
+export interface DbSongbook {
   id: string;
   fullName: string;
-  staticMetadataLink: String;
+  staticMetadataLink: string;
+  imageUrl: string;
 }
 
 // Data object for Songs table
-interface DbSong {
+export interface DbSong {
   id: typeof uuidv4;
   songbookId: string;
   number: number;
@@ -20,11 +21,11 @@ interface DbSong {
   author: string;
   music: string;
   presentationOrder: string;
-  imageUrl: String;
+  imageUrl: string;
 }
 
 // Db Lyric Type Enum
-enum LyricType {
+export enum LyricType {
   LYRIC_TYPE_VERSE,
   LYRIC_TYPE_PRECHORUS,
   LYRIC_TYPE_CHORUS,
@@ -32,7 +33,7 @@ enum LyricType {
 }
 
 // Data object for Lyrics table
-interface DbLyric {
+export interface DbLyric {
   songId: typeof uuidv4;
   lyricType: LyricType;
   verseNumber: number;
@@ -40,7 +41,19 @@ interface DbLyric {
 }
 
 // Data object for joined Songs table with Lyrics table
-interface DbSongWithLyrics {
+export interface DbSongWithLyrics {
   song: DbSong;
   lyrics: DbLyric[];
+}
+
+/**
+ * Converts an object to a DbSongbook object.
+ */
+export function toDbSongbook(data: any): DbSongbook {
+  return {
+    id: data.id ?? '',
+    fullName: data.fullName ?? '',
+    staticMetadataLink: data.staticMetadataLink ?? '',
+    imageUrl: data.imageUrl ?? ''
+  };
 }
