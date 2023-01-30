@@ -23,22 +23,19 @@ app.get('/hi', (req, res) => {
   res.status(200).send('hello');
 });
 
-app.get('/db', async (req, res) => {
-  querySongbooks().then((val) => {
-    res.status(200).send(val);
-  });
+app.get('/db', async (_req, res) => {
+  res.status(200).send(await querySongbooks());
 });
 
 // TODO: Make this a real POST api later
-app.get('/songbooks', (req, res) => {
+app.get('/songbooks', async (req, res) => {
   try {
     console.log(`Create Songbooks API Request received: ${req.url}`);
     const dbSongbook = toDbSongbook(req.query);
     validateInsertSongbookRequest(dbSongbook);
-    insertSongbookMethod(dbSongbook).then((val) => {
-      console.log(`Returning ${val}`);
-      res.status(200).send(val ?? {});
-    });
+    const val = await insertSongbookMethod(dbSongbook);
+    console.log(`Returning ${val}`);
+    res.status(200).send(val ?? {});
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
@@ -63,7 +60,7 @@ function handleErrorsAndReturn(
   if (e instanceof TypeError) {
     res.status(400).send(`Error: Bad Request: ${e.message}`);
   } else if (e instanceof ValidationError) {
-    res.status(400).send(`Validation Error: ${e.message}`)
+    res.status(400).send(`Validation Error: ${e.message}`);
   } else if (e instanceof DatabaseError) {
     res.status(400).send(`Db Error: ${e.message}`);
   } else {
