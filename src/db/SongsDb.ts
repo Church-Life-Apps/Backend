@@ -3,9 +3,14 @@
  */
 
 import {Pool} from 'pg';
-import {QUERY_INSERT_SONGBOOK, QUERY_SELECT_FROM_SONGBOOKS} from './DbQueries';
+import {DbSongbook} from './DbModels';
+import {
+  buildInsertSongbookQuery,
+  QUERY_SELECT_FROM_SONGBOOKS,
+} from './DbQueries';
 require('dotenv').config();
 
+// Setup
 const pool = new Pool({
   host: process.env.PG_HOST,
   port: (process.env.PG_PORT || 25060) as number,
@@ -17,14 +22,48 @@ const pool = new Pool({
   },
 });
 
-export async function querySongbooks(): Promise<any[]> {
-  return await queryDb(QUERY_SELECT_FROM_SONGBOOKS);
+/**
+ * Queries all rows from songbooks table
+ */
+export async function querySongbooks(): Promise<DbSongbook[]> {
+  return await queryDb(QUERY_SELECT_FROM_SONGBOOKS).then((rows) => {
+    return rows.map((row) => mapDbSongbook(row));
+  });
 }
 
-export async function insertSongbook(): Promise<any[]> {
-  return await queryDb(QUERY_INSERT_SONGBOOK);
+/**
+ * Inserts a DbSongbook into the songbooks table
+ */
+export async function insertSongbook(
+  songbook: DbSongbook
+): Promise<DbSongbook> {
+  return await queryDb(
+    buildInsertSongbookQuery(
+      songbook.id,
+      songbook.fullName,
+      songbook.staticMetadataLink,
+      songbook.imageUrl
+    )
+  ).then((rows) => {
+    return rows.map((row) => mapDbSongbook(row))[0];
+  });
 }
 
+/**
+ * Maps a database row to a DbSongbook object.
+ */
+function mapDbSongbook(row: any): DbSongbook {
+  return {
+    id: row.id ?? '',
+    fullName: row.full_name ?? '',
+    staticMetadataLink: row.static_metadata_link ?? '',
+    imageUrl: row.image_url ?? '',
+  };
+}
+
+/**
+ * Database query wrapper function
+ */
 async function queryDb(query: string): Promise<any[]> {
   console.log(`Database Query: "${query}".`);
   return pool
@@ -39,6 +78,9 @@ async function queryDb(query: string): Promise<any[]> {
     });
 }
 
+/**
+ * Database Query wrapper function which is expected to return no rows.
+ */
 async function queryDbVoid(query: string): Promise<void> {
   console.log(`Database Query: "${query}".`);
   return pool

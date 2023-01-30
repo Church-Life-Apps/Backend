@@ -5,10 +5,20 @@
 // Normal Queries
 export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`;
 
-export const QUERY_INSERT_SONGBOOK = `
-    INSERT INTO songbooks 
-    VALUES(%s, %s, %s, now(), now());
-`.trim();
+export function buildInsertSongbookQuery(
+  id: string,
+  fullName: string,
+  staticMetadataLink: string,
+  imageUrl: string
+): string {
+  return `
+        INSERT INTO songbooks 
+        (id, full_name, static_metadata_link, image_url, inserted_dt, updated_dt)
+        VALUES ('${id}', '${fullName}', '${staticMetadataLink}','${imageUrl}', now(), now())
+        ON CONFLICT DO NOTHING
+        RETURNING *; 
+    `.trim();
+}
 
 // One-time queries below this line! Keep here just for reference, but never call these :)
 /* export */ const QUERY_CREATE_SONGBOOKS_TABLE = `
@@ -16,6 +26,7 @@ export const QUERY_INSERT_SONGBOOK = `
         id varchar(50) PRIMARY KEY,
         full_name varchar(500) UNIQUE NOT NULL,
         static_metadata_link text NOT NULL,
+        image_url text NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL
     );
