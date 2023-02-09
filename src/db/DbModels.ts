@@ -54,6 +54,6 @@ export function toDbSongbook(data: any): DbSongbook {
     id: data.id ?? '',
     fullName: data.fullName ?? '',
     staticMetadataLink: data.staticMetadataLink ?? '',
-    imageUrl: data.imageUrl ?? ''
+    imageUrl: data.imageUrl ?? '',
   };
 }

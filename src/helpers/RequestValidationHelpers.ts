@@ -10,6 +10,13 @@ export function validateInsertSongbookRequest(songbook: DbSongbook) {
 }
 
 /**
+ * Validates the request of GetSongs API
+ */
+export function validateGetSongsRequest(songbookId: string) {
+  validateString(songbookId, 'songbookId');
+}
+
+/**
  * Validates a string.
  */
 function validateString(data: string, fieldName: string) {
