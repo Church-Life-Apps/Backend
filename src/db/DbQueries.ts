@@ -20,6 +20,14 @@ export function buildInsertSongbookQuery(
     `.trim();
 }
 
+export function buildGetSongsForSongbookQuery(songbookId: string): string {
+  return `
+        SELECT * FROM songs
+        WHERE songbook_id = '${songbookId}'
+        ORDER BY number
+    `.trim();
+}
+
 // One-time queries below this line! Keep here just for reference, but never call these :)
 /* export */ const QUERY_CREATE_SONGBOOKS_TABLE = `
     CREATE TABLE IF NOT EXISTS songbooks (

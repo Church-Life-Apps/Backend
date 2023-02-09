@@ -4,8 +4,11 @@ import cors from 'cors';
 import * as path from 'path';
 import {querySongbooks} from './db/SongsDb';
 import {toDbSongbook} from './db/DbModels';
-import {validateInsertSongbookRequest} from './helpers/RequestValidationHelpers';
-import {insertSongbookMethod} from './services/SongsService';
+import {
+  validateGetSongsRequest,
+  validateInsertSongbookRequest,
+} from './helpers/RequestValidationHelpers';
+import {getSongsMethod, insertSongbookMethod} from './services/SongsService';
 import {Response} from 'express-serve-static-core';
 import {DatabaseError, ValidationError} from './helpers/ErrorHelpers';
 
@@ -23,12 +26,24 @@ app.get('/hi', (req, res) => {
   res.status(200).send('hello');
 });
 
-app.get('/db', async (_req, res) => {
+// List Songbooks API
+app.get('/songbooks', async (_req, res) => {
   res.status(200).send(await querySongbooks());
 });
 
+// List Songs API
+app.get('/songs', async (req, res) => {
+  try {
+    const songbookId = (req.query.songbookId as string) ?? '';
+    validateGetSongsRequest(songbookId);
+    res.status(200).send(await getSongsMethod(songbookId));
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+});
+
 // TODO: Make this a real POST api later
-app.get('/songbooks', async (req, res) => {
+app.get('/createsongbooks', async (req, res) => {
   try {
     console.log(`Create Songbooks API Request received: ${req.url}`);
     const dbSongbook = toDbSongbook(req.query);

@@ -2,9 +2,11 @@
  * Database Layer Code
  */
 
+import {it} from 'node:test';
 import {Pool} from 'pg';
-import {DbSongbook} from './DbModels';
+import {DbLyric, DbSong, DbSongbook, DbSongWithLyrics} from './DbModels';
 import {
+  buildGetSongsForSongbookQuery,
   buildInsertSongbookQuery,
   QUERY_SELECT_FROM_SONGBOOKS,
 } from './DbQueries';
@@ -29,6 +31,19 @@ export async function querySongbooks(): Promise<DbSongbook[]> {
   return await queryDb(QUERY_SELECT_FROM_SONGBOOKS).then((rows) => {
     return rows.map((row) => mapDbSongbook(row));
   });
+}
+
+/**
+ * Lists all songs for a songbook
+ */
+export async function querySongsForSongbook(
+  songbookId: string
+): Promise<DbSong[]> {
+  return await queryDb(buildGetSongsForSongbookQuery(songbookId)).then(
+    (rows) => {
+      return rows.map((row) => mapDbSong(row));
+    }
+  );
 }
 
 /**
@@ -57,6 +72,22 @@ function mapDbSongbook(row: any): DbSongbook {
     id: row.id ?? '',
     fullName: row.full_name ?? '',
     staticMetadataLink: row.static_metadata_link ?? '',
+    imageUrl: row.image_url ?? '',
+  };
+}
+
+/**
+ * Maps a database row to a DbSong object
+ */
+function mapDbSong(row: any): DbSong {
+  return {
+    id: row.id ?? '',
+    songbookId: row.songbook_id ?? '',
+    number: row.number ?? 0,
+    title: row.title ?? '',
+    author: row.author ?? '',
+    music: row.music ?? '',
+    presentationOrder: row.presentation_order ?? '',
     imageUrl: row.image_url ?? '',
   };
 }
