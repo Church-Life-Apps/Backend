@@ -28,6 +28,16 @@ export function buildGetSongsForSongbookQuery(songbookId: string): string {
     `.trim();
 }
 
+export function buildGetSongWithLyricsQuery(
+  songbookId: string,
+  number: number
+): string {
+  return `
+        SELECT * FROM songs s LEFT JOIN lyrics l ON s.id = l.song_id
+        WHERE s.songbook_id = '${songbookId}' AND s.number = ${number}
+    `.trim();
+}
+
 // One-time queries below this line! Keep here just for reference, but never call these :)
 /* export */ const QUERY_CREATE_SONGBOOKS_TABLE = `
     CREATE TABLE IF NOT EXISTS songbooks (
