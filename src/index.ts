@@ -5,10 +5,15 @@ import * as path from 'path';
 import {querySongbooks} from './db/SongsDb';
 import {toDbSongbook} from './db/DbModels';
 import {
+  validateGetSongRequest,
   validateGetSongsRequest,
   validateInsertSongbookRequest,
 } from './helpers/RequestValidationHelpers';
-import {getSongsMethod, insertSongbookMethod} from './services/SongsService';
+import {
+  getSongsMethod,
+  getSongWithLyricsMethod,
+  insertSongbookMethod,
+} from './services/SongsService';
 import {Response} from 'express-serve-static-core';
 import {DatabaseError, ValidationError} from './helpers/ErrorHelpers';
 
@@ -37,6 +42,20 @@ app.get('/songs', async (req, res) => {
     const songbookId = (req.query.songbookId as string) ?? '';
     validateGetSongsRequest(songbookId);
     res.status(200).send(await getSongsMethod(songbookId));
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+});
+
+// Get Song [With Lyrics] API
+app.get('/song', async (req, res) => {
+  try {
+    const songbookId = (req.query.songbookId as string) ?? '';
+    const number = (req.query.number as string) ?? '';
+    validateGetSongRequest(songbookId, number);
+    res
+      .status(200)
+      .send(await getSongWithLyricsMethod(songbookId, parseInt(number)));
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }

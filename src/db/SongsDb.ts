@@ -4,9 +4,11 @@
 
 import {it} from 'node:test';
 import {Pool} from 'pg';
+import {DatabaseError} from '../helpers/ErrorHelpers';
 import {DbLyric, DbSong, DbSongbook, DbSongWithLyrics} from './DbModels';
 import {
   buildGetSongsForSongbookQuery,
+  buildGetSongWithLyricsQuery,
   buildInsertSongbookQuery,
   QUERY_SELECT_FROM_SONGBOOKS,
 } from './DbQueries';
@@ -42,6 +44,23 @@ export async function querySongsForSongbook(
   return await queryDb(buildGetSongsForSongbookQuery(songbookId)).then(
     (rows) => {
       return rows.map((row) => mapDbSong(row));
+    }
+  );
+}
+
+/**
+ * Queries for a song with its lyrics for a song based on songbook and number
+ */
+export async function querySongWithLyrics(
+  songbookId: string,
+  number: number
+): Promise<DbSongWithLyrics> {
+  return await queryDb(buildGetSongWithLyricsQuery(songbookId, number)).then(
+    (rows) => {
+      if (rows.length <= 0) {
+        throw new DatabaseError(`Song not found for ${songbookId}: ${number}`);
+      }
+      return mapDbSongWithLyric(rows);
     }
   );
 }
@@ -89,6 +108,33 @@ function mapDbSong(row: any): DbSong {
     music: row.music ?? '',
     presentationOrder: row.presentation_order ?? '',
     imageUrl: row.image_url ?? '',
+  };
+}
+
+/**
+ * Maps a database row to a DbLyric object
+ */
+function mapDbLyric(row: any): DbLyric {
+  return {
+    songId: row.song_id ?? '',
+    lyricType: row.lyric_type ?? '',
+    verseNumber: row.verse_number ?? '',
+    lyrics: row.lyrics ?? '',
+  };
+}
+
+/**
+ * Maps a set of rows to a DbSongWithLyric object.
+ * Requires that all the lyrics are associated with the same song.
+ */
+function mapDbSongWithLyric(rows: any): DbSongWithLyrics {
+  return {
+    song: mapDbSong(rows[0]),
+    lyrics: rows
+      .filter((row: any) => {
+        return mapDbLyric(row).lyrics.length > 0;
+      })
+      .map((row: any) => mapDbLyric(row)),
   };
 }
 
