@@ -1,5 +1,7 @@
-import {DbSong, DbSongbook, DbSongWithLyrics} from '../db/DbModels';
+import {DbLyric, DbSong, DbSongbook, DbSongWithLyrics} from '../db/DbModels';
 import {
+  insertLyric,
+  insertSong,
   insertSongbook,
   querySongsForSongbook,
   querySongWithLyrics,
@@ -12,6 +14,20 @@ export async function insertSongbookMethod(
   songbook: DbSongbook
 ): Promise<DbSongbook> {
   return await insertSongbook(songbook);
+}
+
+/**
+ * Service logic for insertSong API
+ */
+export async function insertSongMethod(song: DbSong): Promise<DbSong> {
+  return await insertSong(song);
+}
+
+/**
+ * Service logic for insertLyric API
+ */
+export async function insertLyricMethod(lyric: DbLyric): Promise<DbLyric> {
+  return await insertLyric(lyric);
 }
 
 /**
