@@ -3,16 +3,20 @@ import express from 'express';
 import cors from 'cors';
 import * as path from 'path';
 import {querySongbooks} from './db/SongsDb';
-import {toDbSongbook} from './db/DbModels';
+import {toDbLyric, toDbSong, toDbSongbook} from './db/DbModels';
 import {
   validateGetSongRequest,
   validateGetSongsRequest,
+  validateInsertLyricRequest,
   validateInsertSongbookRequest,
+  validateInsertSongRequest,
 } from './helpers/RequestValidationHelpers';
 import {
   getSongsMethod,
   getSongWithLyricsMethod,
+  insertLyricMethod,
   insertSongbookMethod,
+  insertSongMethod,
 } from './services/SongsService';
 import {Response} from 'express-serve-static-core';
 import {DatabaseError, ValidationError} from './helpers/ErrorHelpers';
@@ -61,13 +65,41 @@ app.get('/song', async (req, res) => {
   }
 });
 
-// TODO: Make this a real POST api later
-app.get('/createsongbooks', async (req, res) => {
+// Create Songbook API
+app.post('/createsongbook', async (req, res) => {
   try {
-    console.log(`Create Songbooks API Request received: ${req.url}`);
-    const dbSongbook = toDbSongbook(req.query);
+    console.log(`Create Songbook API Request received: ${req.url}`);
+    const dbSongbook = toDbSongbook(req.body);
     validateInsertSongbookRequest(dbSongbook);
     const val = await insertSongbookMethod(dbSongbook);
+    console.log(`Returning ${val}`);
+    res.status(200).send(val ?? {});
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+});
+
+// Create Song API
+app.post('/createsong', async (req, res) => {
+  try {
+    console.log(`Create Song API Request received: ${req.url}`);
+    const dbSong = toDbSong(req.body);
+    validateInsertSongRequest(dbSong);
+    const val = await insertSongMethod(dbSong);
+    console.log(`Returning ${val}`);
+    res.status(200).send(val ?? {});
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+});
+
+// Create Lyric API
+app.post('/createlyric', async (req, res) => {
+  try {
+    console.log(`Create Lyric API Request received: ${req.url}`);
+    const dbLyric = toDbLyric(req.body);
+    validateInsertLyricRequest(dbLyric);
+    const val = await insertLyricMethod(dbLyric);
     console.log(`Returning ${val}`);
     res.status(200).send(val ?? {});
   } catch (e: any) {

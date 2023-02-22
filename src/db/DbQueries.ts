@@ -2,6 +2,9 @@
  * String Constants for DB Queries
  */
 
+import {v4 as uuidv4} from 'uuid';
+import {LyricType} from './DbModels';
+
 // Normal Queries
 export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`;
 
@@ -17,6 +20,41 @@ export function buildInsertSongbookQuery(
         VALUES ('${id}', '${fullName}', '${staticMetadataLink}','${imageUrl}', now(), now())
         ON CONFLICT DO NOTHING
         RETURNING *; 
+    `.trim();
+}
+
+export function buildInsertSongQuery(
+  id: typeof uuidv4,
+  songbookId: string,
+  number: number,
+  title: string,
+  author: string,
+  music: string,
+  presentationOrder: string,
+  imageUrl: string
+): string {
+  return `
+        INSERT INTO songs
+        (id, songbook_id, number, title, author, music, presentation_order, image_url, inserted_dt, updated_dt)
+        VALUES ('${id}', '${songbookId}', ${number}, '${title}', '${author}', '${music}', '${presentationOrder}',
+        '${imageUrl}', now(), now())
+        ON CONFLICT DO NOTHING
+        RETURNING *
+    `.trim();
+}
+
+export function buildInsertLyricQuery(
+  songId: typeof uuidv4,
+  lyricType: LyricType,
+  verseNumber: number,
+  lyrics: string
+): string {
+  return `
+        INSERT INTO lyrics
+        (song_id, lyric_type, verse_number, lyrics, inserted_dt, updated_dt)
+        VALUES ('${songId}', '${lyricType}', ${verseNumber}, '${lyrics}', now(), now())
+        ON CONFLICT DO NOTHING
+        RETURNING *
     `.trim();
 }
 
