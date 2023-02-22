@@ -57,3 +57,31 @@ export function toDbSongbook(data: any): DbSongbook {
     imageUrl: data.imageUrl ?? '',
   };
 }
+
+/**
+ * Converts an object to a DbSongbook object.
+ */
+export function toDbSong(data: any): DbSong {
+  return {
+    id: data.id ?? '',
+    songbookId: data.songbookId ?? '',
+    number: data.number ?? 0,
+    title: data.title ?? '',
+    author: data.author ?? '',
+    music: data.music ?? '',
+    presentationOrder: data.presentationOrder ?? '',
+    imageUrl: data.imageUrl ?? '',
+  };
+}
+
+/**
+ * Converts an object to a DbLyric object.
+ */
+export function toDbLyric(data: any): DbLyric {
+  return {
+    songId: data.songId ?? '',
+    lyricType: data.lyricType ?? '',
+    verseNumber: data.verseNumber ?? 0,
+    lyrics: data.lyrics ?? '',
+  };
+}

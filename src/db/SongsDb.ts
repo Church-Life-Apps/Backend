@@ -5,11 +5,14 @@
 import {it} from 'node:test';
 import {Pool} from 'pg';
 import {DatabaseError} from '../helpers/ErrorHelpers';
+import {formatForDbEntry} from '../utils/StringUtils';
 import {DbLyric, DbSong, DbSongbook, DbSongWithLyrics} from './DbModels';
 import {
   buildGetSongsForSongbookQuery,
   buildGetSongWithLyricsQuery,
+  buildInsertLyricQuery,
   buildInsertSongbookQuery,
+  buildInsertSongQuery,
   QUERY_SELECT_FROM_SONGBOOKS,
 } from './DbQueries';
 require('dotenv').config();
@@ -79,7 +82,55 @@ export async function insertSongbook(
       songbook.imageUrl
     )
   ).then((rows) => {
-    return rows.map((row) => mapDbSongbook(row))[0];
+    if (rows.length > 0) {
+      return rows.map((row) => mapDbSongbook(row))[0];
+    } else {
+      throw new DatabaseError('Unable to insert Songbook');
+    }
+  });
+}
+
+/**
+ * Inserts a DbSong into the songs table
+ */
+export async function insertSong(song: DbSong): Promise<DbSong> {
+  return await queryDb(
+    buildInsertSongQuery(
+      song.id,
+      song.songbookId,
+      song.number,
+      formatForDbEntry(song.title),
+      formatForDbEntry(song.author),
+      formatForDbEntry(song.music),
+      song.presentationOrder,
+      song.imageUrl
+    )
+  ).then((rows) => {
+    if (rows.length > 0) {
+      return mapDbSong(rows[0]);
+    } else {
+      throw new DatabaseError('Unable to insert song.');
+    }
+  });
+}
+
+/**
+ * Inserts a DbLyric into the lyrics table
+ */
+export async function insertLyric(lyric: DbLyric): Promise<DbLyric> {
+  return await queryDb(
+    buildInsertLyricQuery(
+      lyric.songId,
+      lyric.lyricType,
+      lyric.verseNumber,
+      formatForDbEntry(lyric.lyrics)
+    )
+  ).then((rows) => {
+    if (rows.length > 0) {
+      return mapDbLyric(rows[0]);
+    } else {
+      throw new DatabaseError('Unable to insert lyric');
+    }
   });
 }
 
