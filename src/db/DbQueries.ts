@@ -1,8 +1,7 @@
 /**
- * String Constants for DB Queries
+ * Strings and functions for DB Queries
  */
 
-import {v4 as uuidv4} from 'uuid';
 import {LyricType} from './DbModels';
 
 // Normal Queries
@@ -24,7 +23,7 @@ export function buildInsertSongbookQuery(
 }
 
 export function buildInsertSongQuery(
-  id: typeof uuidv4,
+  id: string,
   songbookId: string,
   number: number,
   title: string,
@@ -44,7 +43,7 @@ export function buildInsertSongQuery(
 }
 
 export function buildInsertLyricQuery(
-  songId: typeof uuidv4,
+  songId: string,
   lyricType: LyricType,
   verseNumber: number,
   lyrics: string
@@ -76,8 +75,8 @@ export function buildGetSongWithLyricsQuery(
     `.trim();
 }
 
-// One-time queries below this line! Keep here just for reference, but never call these :)
-/* export */ const QUERY_CREATE_SONGBOOKS_TABLE = `
+// One-time queries below this line! Should only be called by TEST cases :)
+export const QUERY_CREATE_SONGBOOKS_TABLE = `
     CREATE TABLE IF NOT EXISTS songbooks (
         id varchar(50) PRIMARY KEY,
         full_name varchar(500) UNIQUE NOT NULL,
@@ -88,7 +87,7 @@ export function buildGetSongWithLyricsQuery(
     );
 `.trim();
 
-/* export */ const QUERY_CREATE_SONGS_TABLE = `
+export const QUERY_CREATE_SONGS_TABLE = `
     CREATE TABLE IF NOT EXISTS songs (
         id uuid PRIMARY KEY,
         songbook_id varchar(50) REFERENCES songbooks(id),
@@ -104,7 +103,7 @@ export function buildGetSongWithLyricsQuery(
     );
 `.trim();
 
-/* export */ const QUERY_CREATE_LYRIC_TYPE_ENUM = `
+export const QUERY_CREATE_LYRIC_TYPE_ENUM = `
     CREATE TYPE lyric_type as ENUM (
         'LYRIC_TYPE_VERSE',
         'LYRIC_TYPE_PRECHORUS',
@@ -113,7 +112,7 @@ export function buildGetSongWithLyricsQuery(
     );
 `.trim();
 
-/* export */ const QUERY_CREATE_LYRICS_TABLE = `
+export const QUERY_CREATE_LYRICS_TABLE = `
     CREATE TABLE IF NOT EXISTS lyrics (
         song_id uuid NOT NULL REFERENCES songs(id),
         lyric_type lyric_type NOT NULL,

@@ -79,11 +79,8 @@ function validateIntegerGreaterThanZero(data: number, fieldName: string) {
 /**
  * Validates a string is a valid uuid.
  */
-function validateUuid(data: typeof uuidv4, fieldName: String) {
-  if (
-    !validate(data.toString()) ||
-    data.toString() == '00000000-0000-0000-0000-000000000000'
-  ) {
+function validateUuid(data: string, fieldName: String) {
+  if (!validate(data) || data == '00000000-0000-0000-0000-000000000000') {
     throw new ValidationError(`${fieldName} is not a valid UUID.`);
   }
 }

@@ -2,7 +2,6 @@ import * as dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import * as path from 'path';
-import {querySongbooks} from './db/SongsDb';
 import {toDbLyric, toDbSong, toDbSongbook} from './db/DbModels';
 import {
   validateGetSongRequest,
@@ -11,13 +10,7 @@ import {
   validateInsertSongbookRequest,
   validateInsertSongRequest,
 } from './helpers/RequestValidationHelpers';
-import {
-  getSongsMethod,
-  getSongWithLyricsMethod,
-  insertLyricMethod,
-  insertSongbookMethod,
-  insertSongMethod,
-} from './services/SongsService';
+import {SongsService} from './services/SongsService';
 import {Response} from 'express-serve-static-core';
 import {DatabaseError, ValidationError} from './helpers/ErrorHelpers';
 
@@ -31,13 +24,15 @@ app.use(express.static(path.resolve(__dirname, '../web-build')));
 
 const PORT = process.env.PORT || 3000;
 
+const songsService = new SongsService();
+
 app.get('/hi', (req, res) => {
   res.status(200).send('hello');
 });
 
 // List Songbooks API
 app.get('/songbooks', async (_req, res) => {
-  res.status(200).send(await querySongbooks());
+  res.status(200).send(await songsService.getSongbooks());
 });
 
 // List Songs API
@@ -45,7 +40,7 @@ app.get('/songs', async (req, res) => {
   try {
     const songbookId = (req.query.songbookId as string) ?? '';
     validateGetSongsRequest(songbookId);
-    res.status(200).send(await getSongsMethod(songbookId));
+    res.status(200).send(await songsService.getSongsMethod(songbookId));
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
@@ -59,7 +54,9 @@ app.get('/song', async (req, res) => {
     validateGetSongRequest(songbookId, number);
     res
       .status(200)
-      .send(await getSongWithLyricsMethod(songbookId, parseInt(number)));
+      .send(
+        await songsService.getSongWithLyricsMethod(songbookId, parseInt(number))
+      );
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
@@ -71,7 +68,7 @@ app.post('/createsongbook', async (req, res) => {
     console.log(`Create Songbook API Request received: ${req.url}`);
     const dbSongbook = toDbSongbook(req.body);
     validateInsertSongbookRequest(dbSongbook);
-    const val = await insertSongbookMethod(dbSongbook);
+    const val = await songsService.insertSongbookMethod(dbSongbook);
     console.log(`Returning ${val}`);
     res.status(200).send(val ?? {});
   } catch (e: any) {
@@ -85,7 +82,7 @@ app.post('/createsong', async (req, res) => {
     console.log(`Create Song API Request received: ${req.url}`);
     const dbSong = toDbSong(req.body);
     validateInsertSongRequest(dbSong);
-    const val = await insertSongMethod(dbSong);
+    const val = await songsService.insertSongMethod(dbSong);
     console.log(`Returning ${val}`);
     res.status(200).send(val ?? {});
   } catch (e: any) {
@@ -99,7 +96,7 @@ app.post('/createlyric', async (req, res) => {
     console.log(`Create Lyric API Request received: ${req.url}`);
     const dbLyric = toDbLyric(req.body);
     validateInsertLyricRequest(dbLyric);
-    const val = await insertLyricMethod(dbLyric);
+    const val = await songsService.insertLyricMethod(dbLyric);
     console.log(`Returning ${val}`);
     res.status(200).send(val ?? {});
   } catch (e: any) {

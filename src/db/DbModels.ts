@@ -14,7 +14,7 @@ export interface DbSongbook {
 
 // Data object for Songs table
 export interface DbSong {
-  id: typeof uuidv4;
+  id: string; // uuid
   songbookId: string;
   number: number;
   title: string;
@@ -26,15 +26,15 @@ export interface DbSong {
 
 // Db Lyric Type Enum
 export enum LyricType {
-  LYRIC_TYPE_VERSE,
-  LYRIC_TYPE_PRECHORUS,
-  LYRIC_TYPE_CHORUS,
-  LYRIC_TYPE_BRIDGE,
+  LYRIC_TYPE_VERSE = "LYRIC_TYPE_VERSE",
+  LYRIC_TYPE_PRECHORUS = "LYRIC_TYPE_PRECHORUS",
+  LYRIC_TYPE_CHORUS = "LYRIC_TYPE_CHORUS",
+  LYRIC_TYPE_BRIDGE = "LYRIC_TYPE_BRIDGE",
 }
 
 // Data object for Lyrics table
 export interface DbLyric {
-  songId: typeof uuidv4;
+  songId: string; // uuid
   lyricType: LyricType;
   verseNumber: number;
   lyrics: string;

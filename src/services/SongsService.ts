@@ -1,48 +1,39 @@
 import {DbLyric, DbSong, DbSongbook, DbSongWithLyrics} from '../db/DbModels';
-import {
-  insertLyric,
-  insertSong,
-  insertSongbook,
-  querySongsForSongbook,
-  querySongWithLyrics,
-} from '../db/SongsDb';
+import {SongsDb} from '../db/SongsDb';
 
-/**
- * Service logic for insertSongbook API
- */
-export async function insertSongbookMethod(
-  songbook: DbSongbook
-): Promise<DbSongbook> {
-  return await insertSongbook(songbook);
-}
+export class SongsService {
+  songsDb: SongsDb;
 
-/**
- * Service logic for insertSong API
- */
-export async function insertSongMethod(song: DbSong): Promise<DbSong> {
-  return await insertSong(song);
-}
+  constructor() {
+    const songsDb = new SongsDb(null);
+  }
 
-/**
- * Service logic for insertLyric API
- */
-export async function insertLyricMethod(lyric: DbLyric): Promise<DbLyric> {
-  return await insertLyric(lyric);
-}
+  // INSERT Functions
+  async insertSongbookMethod(songbook: DbSongbook): Promise<DbSongbook> {
+    return await this.songsDb.insertSongbook(songbook);
+  }
 
-/**
- * Service logic for getSongs API
- */
-export async function getSongsMethod(songbookId: string): Promise<DbSong[]> {
-  return await querySongsForSongbook(songbookId);
-}
+  async insertSongMethod(song: DbSong): Promise<DbSong> {
+    return await this.songsDb.insertSong(song);
+  }
 
-/**
- * Service logic for getSongWithLyrics API
- */
-export async function getSongWithLyricsMethod(
-  songbookId: string,
-  number: number
-): Promise<DbSongWithLyrics> {
-  return await querySongWithLyrics(songbookId, number);
+  async insertLyricMethod(lyric: DbLyric): Promise<DbLyric> {
+    return await this.songsDb.insertLyric(lyric);
+  }
+
+  // SELECT Functions
+  async getSongbooks(): Promise<DbSongbook[]> {
+    return await this.songsDb.querySongbooks();
+  }
+
+  async getSongsMethod(songbookId: string): Promise<DbSong[]> {
+    return await this.songsDb.querySongsForSongbook(songbookId);
+  }
+
+  async getSongWithLyricsMethod(
+    songbookId: string,
+    number: number
+  ): Promise<DbSongWithLyrics> {
+    return await this.songsDb.querySongWithLyrics(songbookId, number);
+  }
 }
