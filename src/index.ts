@@ -27,12 +27,16 @@ const PORT = process.env.PORT || 3000;
 const songsService = new SongsService();
 
 app.get('/hi', (req, res) => {
-  res.status(200).send('hello');
+  res.send('hello');
 });
 
 // List Songbooks API
 app.get('/songbooks', async (_req, res) => {
-  res.status(200).send(await songsService.getSongbooks());
+  try {
+    res.send(await songsService.getSongbooks());
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
 });
 
 // List Songs API
@@ -40,7 +44,7 @@ app.get('/songs', async (req, res) => {
   try {
     const songbookId = (req.query.songbookId as string) ?? '';
     validateGetSongsRequest(songbookId);
-    res.status(200).send(await songsService.getSongsMethod(songbookId));
+    res.send(await songsService.getSongsMethod(songbookId));
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
@@ -52,11 +56,9 @@ app.get('/song', async (req, res) => {
     const songbookId = (req.query.songbookId as string) ?? '';
     const number = (req.query.number as string) ?? '';
     validateGetSongRequest(songbookId, number);
-    res
-      .status(200)
-      .send(
-        await songsService.getSongWithLyricsMethod(songbookId, parseInt(number))
-      );
+    res.send(
+      await songsService.getSongWithLyricsMethod(songbookId, parseInt(number))
+    );
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
@@ -70,7 +72,7 @@ app.post('/createsongbook', async (req, res) => {
     validateInsertSongbookRequest(dbSongbook);
     const val = await songsService.insertSongbookMethod(dbSongbook);
     console.log(`Returning ${val}`);
-    res.status(200).send(val ?? {});
+    res.send(val ?? {});
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
@@ -84,7 +86,7 @@ app.post('/createsong', async (req, res) => {
     validateInsertSongRequest(dbSong);
     const val = await songsService.insertSongMethod(dbSong);
     console.log(`Returning ${val}`);
-    res.status(200).send(val ?? {});
+    res.send(val ?? {});
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
@@ -98,7 +100,7 @@ app.post('/createlyric', async (req, res) => {
     validateInsertLyricRequest(dbLyric);
     const val = await songsService.insertLyricMethod(dbLyric);
     console.log(`Returning ${val}`);
-    res.status(200).send(val ?? {});
+    res.send(val ?? {});
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
