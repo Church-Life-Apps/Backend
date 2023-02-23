@@ -5,7 +5,7 @@ export class SongsService {
   songsDb: SongsDb;
 
   constructor() {
-    const songsDb = new SongsDb(null);
+    this.songsDb = new SongsDb(null);
   }
 
   // INSERT Functions
