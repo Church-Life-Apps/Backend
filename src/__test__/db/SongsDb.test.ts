@@ -1,5 +1,11 @@
 import {Pool} from 'pg';
-import {DbLyric, DbSong, DbSongbook, DbSongWithLyrics, LyricType} from '../../db/DbModels';
+import {
+  DbLyric,
+  DbSong,
+  DbSongbook,
+  DbSongWithLyrics,
+  LyricType,
+} from '../../db/DbModels';
 import {
   QUERY_CREATE_LYRICS_TABLE,
   QUERY_CREATE_LYRIC_TYPE_ENUM,
@@ -58,6 +64,7 @@ const author = 'Song Author';
 const music = 'Song Music';
 const presentationOrder = 'v1 c1 v2 c1 v3 c1 v4 c2';
 const songImageUrl = 'song_image_url';
+const songAudioUrl = 'song_audio_url';
 const verse1 = 'Some lyrics for the first verse';
 const verse2 = 'More lyrics for the second verse';
 const chorus = 'Final lyrics for the chorus';
@@ -78,6 +85,7 @@ const testSong: DbSong = {
   music: music,
   presentationOrder: presentationOrder,
   imageUrl: songImageUrl,
+  audioUrl: songAudioUrl,
 };
 
 const testLyrics: DbLyric[] = [
@@ -102,8 +110,8 @@ const testLyrics: DbLyric[] = [
 ];
 
 const testSongWithLyrics: DbSongWithLyrics = {
-    song: testSong,
-    lyrics: testLyrics
+  song: testSong,
+  lyrics: testLyrics,
 };
 
 describe('Test Songbooks, Songs, and Lyrics Database Tables', () => {
@@ -158,7 +166,10 @@ describe('Test Songbooks, Songs, and Lyrics Database Tables', () => {
     const inserted3 = await songsDb.insertLyric(testLyrics[2]);
     assertJsonEquality([inserted1, inserted2, inserted3], testLyrics);
 
-    const queriedSongWithLyrics = await songsDb.querySongWithLyrics(songbookId, number)
+    const queriedSongWithLyrics = await songsDb.querySongWithLyrics(
+      songbookId,
+      number
+    );
     assertJsonEquality(queriedSongWithLyrics, testSongWithLyrics);
 
     assertFails(

@@ -30,13 +30,14 @@ export function buildInsertSongQuery(
   author: string,
   music: string,
   presentationOrder: string,
-  imageUrl: string
+  imageUrl: string,
+  audioUrl: string
 ): string {
   return `
         INSERT INTO songs
-        (id, songbook_id, number, title, author, music, presentation_order, image_url, inserted_dt, updated_dt)
+        (id, songbook_id, number, title, author, music, presentation_order, image_url, audio_url, inserted_dt, updated_dt)
         VALUES ('${id}', '${songbookId}', ${number}, '${title}', '${author}', '${music}', '${presentationOrder}',
-        '${imageUrl}', now(), now())
+        '${imageUrl}', '${audioUrl}', now(), now())
         ON CONFLICT DO NOTHING
         RETURNING *
     `.trim();
@@ -97,6 +98,7 @@ export const QUERY_CREATE_SONGS_TABLE = `
         music varchar(500) NOT NULL,
         presentation_order text NOT NULL,
         image_url text NOT NULL,
+        audio_url text NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL,
         UNIQUE(songbook_id, number)

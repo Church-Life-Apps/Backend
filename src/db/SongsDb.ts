@@ -109,7 +109,8 @@ export class SongsDb {
         formatForDbEntry(song.author),
         formatForDbEntry(song.music),
         song.presentationOrder,
-        song.imageUrl
+        song.imageUrl,
+        song.audioUrl
       )
     ).then((rows) => {
       if (rows.length > 0) {
@@ -165,6 +166,7 @@ export class SongsDb {
       music: row.music ?? '',
       presentationOrder: row.presentation_order ?? '',
       imageUrl: row.image_url ?? '',
+      audioUrl: row.audio_url ?? '',
     };
   }
 
