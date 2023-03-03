@@ -88,6 +88,16 @@ const testSong: DbSong = {
   audioUrl: songAudioUrl,
 };
 
+const testSongUpdated = {
+  ...testSong,
+  title: 'new title',
+  author: 'new author',
+  music: 'new music',
+  presentationOrder: 'v1 v1 v1 v1 v1',
+  imageUrl: 'new song iamge url',
+  audioUrl: 'new audio url',
+};
+
 const testLyrics: DbLyric[] = [
   {
     songId: songId,
@@ -143,7 +153,7 @@ describe('Test Songbooks, Songs, and Lyrics Database Tables', () => {
 
   test(`Insert and Get Song Functions`, async () => {
     await songsDb.insertSongbook(testSongbook);
-    const inserted = await songsDb.insertSong(testSong);
+    const inserted = await songsDb.upsertSong(testSong);
     assertJsonEquality(inserted, testSong);
 
     const queried = await songsDb.querySongsForSongbook(songbookId);
@@ -152,15 +162,16 @@ describe('Test Songbooks, Songs, and Lyrics Database Tables', () => {
     const empty = await songsDb.querySongsForSongbook('no songbook id');
     expect(empty.length).toBe(0);
 
-    assertFails(
-      () => songsDb.insertSong(testSong),
-      'Insert song should fail on duplicate id.'
-    );
+    const updated = await songsDb.upsertSong(testSongUpdated);
+    assertJsonEquality(updated, testSongUpdated)
+
+    const queriedUpdated = await songsDb.querySongsForSongbook(songbookId);
+    assertJsonEquality(queriedUpdated, [testSongUpdated]);
   });
 
   test(`Insert Lyrics and Get Lyric Functions`, async () => {
     await songsDb.insertSongbook(testSongbook);
-    await songsDb.insertSong(testSong);
+    await songsDb.upsertSong(testSong);
     const inserted1 = await songsDb.insertLyric(testLyrics[0]);
     const inserted2 = await songsDb.insertLyric(testLyrics[1]);
     const inserted3 = await songsDb.insertLyric(testLyrics[2]);

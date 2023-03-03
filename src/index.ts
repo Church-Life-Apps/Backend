@@ -65,7 +65,7 @@ app.get('/song', async (req, res) => {
 });
 
 // Create Songbook API
-app.post('/createsongbook', async (req, res) => {
+app.post('/songbook', async (req, res) => {
   try {
     console.log(`Create Songbook API Request received: ${req.url}`);
     const dbSongbook = toDbSongbook(req.body);
@@ -79,12 +79,12 @@ app.post('/createsongbook', async (req, res) => {
 });
 
 // Create Song API
-app.post('/createsong', async (req, res) => {
+app.post('/song', async (req, res) => {
   try {
     console.log(`Create Song API Request received: ${req.url}`);
     const dbSong = toDbSong(req.body);
     validateInsertSongRequest(dbSong);
-    const val = await songsService.insertSongMethod(dbSong);
+    const val = await songsService.upsertSongMethod(dbSong);
     console.log(`Returning ${val}`);
     res.send(val ?? {});
   } catch (e: any) {
@@ -93,7 +93,7 @@ app.post('/createsong', async (req, res) => {
 });
 
 // Create Lyric API
-app.post('/createlyric', async (req, res) => {
+app.post('/lyric', async (req, res) => {
   try {
     console.log(`Create Lyric API Request received: ${req.url}`);
     const dbLyric = toDbLyric(req.body);

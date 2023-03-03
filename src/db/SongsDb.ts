@@ -11,7 +11,7 @@ import {
   buildGetSongWithLyricsQuery,
   buildInsertLyricQuery,
   buildInsertSongbookQuery,
-  buildInsertSongQuery,
+  buildUpsertSongQuery,
   QUERY_SELECT_FROM_SONGBOOKS,
 } from './DbQueries';
 require('dotenv').config();
@@ -97,11 +97,11 @@ export class SongsDb {
   }
 
   /**
-   * Inserts a DbSong into the songs table
+   * Inserts or Updates a DbSong into the songs table
    */
-  async insertSong(song: DbSong): Promise<DbSong> {
+  async upsertSong(song: DbSong): Promise<DbSong> {
     return await this.queryDb(
-      buildInsertSongQuery(
+      buildUpsertSongQuery(
         song.id,
         song.songbookId,
         song.number,
