@@ -22,14 +22,15 @@ export interface DbSong {
   music: string;
   presentationOrder: string;
   imageUrl: string;
+  audioUrl: string;
 }
 
 // Db Lyric Type Enum
 export enum LyricType {
-  LYRIC_TYPE_VERSE = "LYRIC_TYPE_VERSE",
-  LYRIC_TYPE_PRECHORUS = "LYRIC_TYPE_PRECHORUS",
-  LYRIC_TYPE_CHORUS = "LYRIC_TYPE_CHORUS",
-  LYRIC_TYPE_BRIDGE = "LYRIC_TYPE_BRIDGE",
+  LYRIC_TYPE_VERSE = 'LYRIC_TYPE_VERSE',
+  LYRIC_TYPE_PRECHORUS = 'LYRIC_TYPE_PRECHORUS',
+  LYRIC_TYPE_CHORUS = 'LYRIC_TYPE_CHORUS',
+  LYRIC_TYPE_BRIDGE = 'LYRIC_TYPE_BRIDGE',
 }
 
 // Data object for Lyrics table
@@ -71,6 +72,7 @@ export function toDbSong(data: any): DbSong {
     music: data.music ?? '',
     presentationOrder: data.presentationOrder ?? '',
     imageUrl: data.imageUrl ?? '',
+    audioUrl: data.audioUrl ?? '',
   };
 }
 
