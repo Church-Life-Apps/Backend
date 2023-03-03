@@ -22,7 +22,7 @@ export function buildInsertSongbookQuery(
     `.trim();
 }
 
-export function buildInsertSongQuery(
+export function buildUpsertSongQuery(
   id: string,
   songbookId: string,
   number: number,
@@ -38,7 +38,10 @@ export function buildInsertSongQuery(
         (id, songbook_id, number, title, author, music, presentation_order, image_url, audio_url, inserted_dt, updated_dt)
         VALUES ('${id}', '${songbookId}', ${number}, '${title}', '${author}', '${music}', '${presentationOrder}',
         '${imageUrl}', '${audioUrl}', now(), now())
-        ON CONFLICT DO NOTHING
+        ON CONFLICT (songbook_id, number) DO UPDATE SET
+        title = '${title}', author = '${author}', music = '${music}', presentation_order = '${presentationOrder}',
+        image_url = '${imageUrl}', audio_url = '${audioUrl}', updated_dt = now()
+        WHERE songs.songbook_id = '${songbookId}' AND songs.number = '${number}'
         RETURNING *
     `.trim();
 }
@@ -125,3 +128,6 @@ export const QUERY_CREATE_LYRICS_TABLE = `
         PRIMARY KEY (song_id, lyric_type, verse_number)
     );
 `.trim();
+
+export const QUERY_CREATE_PENDING_SONGS_TABLE = `
+`

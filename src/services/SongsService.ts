@@ -13,8 +13,8 @@ export class SongsService {
     return await this.songsDb.insertSongbook(songbook);
   }
 
-  async insertSongMethod(song: DbSong): Promise<DbSong> {
-    return await this.songsDb.insertSong(song);
+  async upsertSongMethod(song: DbSong): Promise<DbSong> {
+    return await this.songsDb.upsertSong(song);
   }
 
   async insertLyricMethod(lyric: DbLyric): Promise<DbLyric> {
