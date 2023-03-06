@@ -57,6 +57,7 @@ const songbookId = 'shl';
 const songbookName = 'Songs and Hymns of Life';
 const smLink = 's_m_link';
 const songbookImageUrl = 'songbook_image_url';
+const openToNewSongs = true;
 const songId = uuidv4();
 const number = 50;
 const title = 'Song Title';
@@ -74,6 +75,7 @@ const testSongbook: DbSongbook = {
   fullName: songbookName,
   staticMetadataLink: smLink,
   imageUrl: songbookImageUrl,
+  openToNewSongs: openToNewSongs,
 };
 
 const testSong: DbSong = {
@@ -163,7 +165,7 @@ describe('Test Songbooks, Songs, and Lyrics Database Tables', () => {
     expect(empty.length).toBe(0);
 
     const updated = await songsDb.upsertSong(testSongUpdated);
-    assertJsonEquality(updated, testSongUpdated)
+    assertJsonEquality(updated, testSongUpdated);
 
     const queriedUpdated = await songsDb.querySongsForSongbook(songbookId);
     assertJsonEquality(queriedUpdated, [testSongUpdated]);

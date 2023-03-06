@@ -11,12 +11,13 @@ export function buildInsertSongbookQuery(
   id: string,
   fullName: string,
   staticMetadataLink: string,
-  imageUrl: string
+  imageUrl: string,
+  openToNewSongs: boolean
 ): string {
   return `
         INSERT INTO songbooks 
-        (id, full_name, static_metadata_link, image_url, inserted_dt, updated_dt)
-        VALUES ('${id}', '${fullName}', '${staticMetadataLink}','${imageUrl}', now(), now())
+        (id, full_name, static_metadata_link, image_url, open_to_new_songs, inserted_dt, updated_dt)
+        VALUES ('${id}', '${fullName}', '${staticMetadataLink}','${imageUrl}', '${openToNewSongs}', now(), now())
         ON CONFLICT DO NOTHING
         RETURNING *; 
     `.trim();
@@ -86,6 +87,7 @@ export const QUERY_CREATE_SONGBOOKS_TABLE = `
         full_name varchar(500) UNIQUE NOT NULL,
         static_metadata_link text NOT NULL,
         image_url text NOT NULL,
+        open_to_new_songs boolean NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL
     );
@@ -130,4 +132,4 @@ export const QUERY_CREATE_LYRICS_TABLE = `
 `.trim();
 
 export const QUERY_CREATE_PENDING_SONGS_TABLE = `
-`
+`;
