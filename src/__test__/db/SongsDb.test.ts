@@ -1,6 +1,7 @@
 import {Pool} from 'pg';
 import {
   DbLyric,
+  DbPendingSong,
   DbSong,
   DbSongbook,
   DbSongWithLyrics,
@@ -9,6 +10,7 @@ import {
 import {
   QUERY_CREATE_LYRICS_TABLE,
   QUERY_CREATE_LYRIC_TYPE_ENUM,
+  QUERY_CREATE_PENDING_SONGS_TABLE,
   QUERY_CREATE_SONGBOOKS_TABLE,
   QUERY_CREATE_SONGS_TABLE,
 } from '../../db/DbQueries';
@@ -34,6 +36,7 @@ const songsDb = new SongsDb(testPool);
 async function nukeDatabase() {
   await testPool.query('DROP TABLE IF EXISTS songbooks CASCADE');
   await testPool.query('DROP TABLE IF EXISTS songs CASCADE');
+  await testPool.query('DROP TABLE IF EXISTS pending_songs CASCADE');
   await testPool.query('DROP TABLE IF EXISTS lyrics CASCADE');
   await testPool.query('DROP TYPE IF EXISTS lyric_type');
 }
@@ -45,11 +48,13 @@ async function initializeDatabase() {
   await testPool.query(QUERY_CREATE_SONGS_TABLE);
   await testPool.query(QUERY_CREATE_LYRIC_TYPE_ENUM);
   await testPool.query(QUERY_CREATE_LYRICS_TABLE);
+  await testPool.query(QUERY_CREATE_PENDING_SONGS_TABLE);
 }
 
 async function resetDatabase() {
   await testPool.query('DELETE FROM lyrics');
   await testPool.query('DELETE FROM songs');
+  await testPool.query('DELETE FROM pending_songs');
   await testPool.query('DELETE FROM songbooks');
 }
 
@@ -126,7 +131,26 @@ const testSongWithLyrics: DbSongWithLyrics = {
   lyrics: testLyrics,
 };
 
-describe('Test Songbooks, Songs, and Lyrics Database Tables', () => {
+const testPendingSong: DbPendingSong = {
+  id: songId,
+  songbookId: songbookId,
+  number: number,
+  title: title,
+  author: author,
+  music: music,
+  presentationOrder: presentationOrder,
+  imageUrl: songImageUrl,
+  audioUrl: songAudioUrl,
+  lyrics: testLyrics,
+};
+
+const testPendingSongUpdated: DbPendingSong = {
+  ...testPendingSong,
+  id: uuidv4(),
+  number: number + 1,
+};
+
+describe('Test Database Tables', () => {
   beforeAll(async () => {
     await initializeDatabase();
   });
@@ -193,6 +217,21 @@ describe('Test Songbooks, Songs, and Lyrics Database Tables', () => {
       () => songsDb.insertLyric({...testLyrics[0], songId: uuidv4()}),
       'Insert lyric should fail due to no song id'
     );
+  });
+
+  test(`Insert Pending Song and Get Pending Songs Functions`, async () => {
+    await songsDb.insertSongbook(testSongbook);
+    const inserted = await songsDb.insertPendingSong(testPendingSong);
+    assertJsonEquality(inserted, testPendingSong);
+
+    const queried = await  songsDb.queryPendingSongs();
+    assertJsonEquality(queried, [testPendingSong]);
+
+    const inserted2 = await songsDb.insertPendingSong(testPendingSongUpdated);
+    assertJsonEquality(inserted2, testPendingSongUpdated);
+
+    const queried2 = await songsDb.queryPendingSongs();
+    assertJsonEquality(queried2, [testPendingSong, testPendingSongUpdated]);
   });
 });
 
