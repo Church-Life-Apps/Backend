@@ -2,11 +2,17 @@ import * as dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
 import * as path from 'path';
-import {toDbLyric, toDbSong, toDbSongbook} from './db/DbModels';
+import {
+  toDbLyric,
+  toDbSong,
+  toDbSongbook,
+  toDbPendingSong,
+} from './db/DbModels';
 import {
   validateGetSongRequest,
   validateGetSongsRequest,
   validateInsertLyricRequest,
+  validateInsertPendingSongRequest,
   validateInsertSongbookRequest,
   validateInsertSongRequest,
 } from './helpers/RequestValidationHelpers';
@@ -64,6 +70,15 @@ app.get('/song', async (req, res) => {
   }
 });
 
+// List Pending Songs API
+app.get('/pendingsongs', async (_req, res) => {
+  try {
+    res.send(await songsService.getPendingSongs());
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+});
+
 // Create Songbook API
 app.post('/songbook', async (req, res) => {
   try {
@@ -71,7 +86,7 @@ app.post('/songbook', async (req, res) => {
     const dbSongbook = toDbSongbook(req.body);
     validateInsertSongbookRequest(dbSongbook);
     const val = await songsService.insertSongbookMethod(dbSongbook);
-    console.log(`Returning ${val}`);
+    console.log(`Returning ${JSON.stringify(val)}`);
     res.send(val ?? {});
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
@@ -85,7 +100,7 @@ app.post('/song', async (req, res) => {
     const dbSong = toDbSong(req.body);
     validateInsertSongRequest(dbSong);
     const val = await songsService.upsertSongMethod(dbSong);
-    console.log(`Returning ${val}`);
+    console.log(`Returning ${JSON.stringify(val)}`);
     res.send(val ?? {});
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
@@ -99,14 +114,28 @@ app.post('/lyric', async (req, res) => {
     const dbLyric = toDbLyric(req.body);
     validateInsertLyricRequest(dbLyric);
     const val = await songsService.insertLyricMethod(dbLyric);
-    console.log(`Returning ${val}`);
+    console.log(`Returning ${JSON.stringify(val)}`);
     res.send(val ?? {});
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
 });
 
-app.get('*', function (request, response) {
+// Create Pending Song API
+app.post('/pendingsong', async (req, res) => {
+  try {
+    console.log(`Create Pending Song API Request received: ${req.url}`);
+    const pendingSong = toDbPendingSong(req.body);
+    validateInsertPendingSongRequest(pendingSong);
+    const val = await songsService.insertPendingSongMethod(pendingSong);
+    console.log(`Returning ${JSON.stringify(val)}`);
+    res.send(val ?? {});
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+});
+
+app.get('*', function (_request, response) {
   response.sendFile(path.resolve(__dirname, '../web-build', 'index.html'));
 });
 

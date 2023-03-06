@@ -1,4 +1,10 @@
-import {DbLyric, DbSong, DbSongbook, DbSongWithLyrics} from '../db/DbModels';
+import {
+  DbLyric,
+  DbPendingSong,
+  DbSong,
+  DbSongbook,
+  DbSongWithLyrics,
+} from '../db/DbModels';
 import {SongsDb} from '../db/SongsDb';
 
 export class SongsService {
@@ -21,6 +27,12 @@ export class SongsService {
     return await this.songsDb.insertLyric(lyric);
   }
 
+  async insertPendingSongMethod(
+    pendingSong: DbPendingSong
+  ): Promise<DbPendingSong> {
+    return await this.songsDb.insertPendingSong(pendingSong);
+  }
+
   // SELECT Functions
   async getSongbooks(): Promise<DbSongbook[]> {
     return await this.songsDb.querySongbooks();
@@ -35,5 +47,9 @@ export class SongsService {
     number: number
   ): Promise<DbSongWithLyrics> {
     return await this.songsDb.querySongWithLyrics(songbookId, number);
+  }
+
+  async getPendingSongs(): Promise<DbPendingSong[]> {
+    return await this.songsDb.queryPendingSongs();
   }
 }

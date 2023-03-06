@@ -5,13 +5,21 @@
 import {Pool} from 'pg';
 import {DatabaseError} from '../helpers/ErrorHelpers';
 import {formatForDbEntry} from '../utils/StringUtils';
-import {DbLyric, DbSong, DbSongbook, DbSongWithLyrics} from './DbModels';
+import {
+  DbLyric,
+  DbPendingSong,
+  DbSong,
+  DbSongbook,
+  DbSongWithLyrics,
+} from './DbModels';
 import {
   buildGetSongsForSongbookQuery,
   buildGetSongWithLyricsQuery,
   buildInsertLyricQuery,
+  buildInsertPendingSongQuery,
   buildInsertSongbookQuery,
   buildUpsertSongQuery,
+  QUERY_SELECT_FROM_PENDING_SONGS,
   QUERY_SELECT_FROM_SONGBOOKS,
 } from './DbQueries';
 require('dotenv').config();
@@ -73,6 +81,15 @@ export class SongsDb {
         throw new DatabaseError(`Song not found for ${songbookId}: ${number}`);
       }
       return this.mapDbSongWithLyric(rows);
+    });
+  }
+
+  /**
+   * Queries all rows from pending_songs table
+   */
+  async queryPendingSongs(): Promise<DbPendingSong[]> {
+    return await this.queryDb(QUERY_SELECT_FROM_PENDING_SONGS).then((rows) => {
+      return rows.map((row) => this.mapDbPendingSong(row));
     });
   }
 
@@ -143,6 +160,32 @@ export class SongsDb {
   }
 
   /**
+   * Inserts a DbPendingSong into the pending_songs table
+   */
+  async insertPendingSong(pendingSong: DbPendingSong): Promise<DbPendingSong> {
+    return await this.queryDb(
+      buildInsertPendingSongQuery(
+        pendingSong.id,
+        pendingSong.songbookId,
+        pendingSong.number,
+        formatForDbEntry(pendingSong.title),
+        formatForDbEntry(pendingSong.author),
+        formatForDbEntry(pendingSong.music),
+        pendingSong.presentationOrder,
+        pendingSong.imageUrl,
+        pendingSong.audioUrl,
+        pendingSong.lyrics
+      )
+    ).then((rows) => {
+      if (rows.length > 0) {
+        return this.mapDbPendingSong(rows[0]);
+      } else {
+        throw new DatabaseError('Unable to insert pending song.');
+      }
+    });
+  }
+
+  /**
    * Maps a database row to a DbSongbook object.
    */
   private mapDbSongbook(row: any): DbSongbook {
@@ -181,6 +224,24 @@ export class SongsDb {
       lyricType: row.lyric_type ?? '',
       verseNumber: row.verse_number ?? '',
       lyrics: row.lyrics ?? '',
+    };
+  }
+
+  /**
+   * Maps a database row to a DbPendingSong object
+   */
+  private mapDbPendingSong(row: any): DbPendingSong {
+    return {
+      id: row.id ?? '',
+      songbookId: row.songbook_id ?? '',
+      number: row.number ?? 0,
+      title: row.title ?? '',
+      author: row.author ?? '',
+      music: row.music ?? '',
+      presentationOrder: row.presentation_order ?? '',
+      imageUrl: row.image_url ?? '',
+      audioUrl: row.audio_url ?? '',
+      lyrics: JSON.parse(row.lyrics ?? '[]'),
     };
   }
 

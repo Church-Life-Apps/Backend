@@ -2,7 +2,7 @@
  * Strings and functions for DB Queries
  */
 
-import {LyricType} from './DbModels';
+import {DbLyric, LyricType} from './DbModels';
 
 // Normal Queries
 export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`;
@@ -80,6 +80,31 @@ export function buildGetSongWithLyricsQuery(
     `.trim();
 }
 
+export function buildInsertPendingSongQuery(
+  id: string,
+  songbookId: string,
+  number: number,
+  title: string,
+  author: string,
+  music: string,
+  presentationOrder: string,
+  imageUrl: string,
+  audioUrl: string,
+  lyrics: DbLyric[]
+): string {
+  return `
+        INSERT INTO pending_songs
+        (id, songbook_id, number, title, author, music, presentation_order, image_url, audio_url, lyrics, inserted_dt, updated_dt)
+        VALUES ('${id}', '${songbookId}', ${number}, '${title}', '${author}', '${music}', '${presentationOrder}',
+        '${imageUrl}', '${audioUrl}', '${JSON.stringify(lyrics)}', now(), now())
+        ON CONFLICT DO NOTHING
+        RETURNING *
+    `.trim();
+}
+
+export const QUERY_SELECT_FROM_PENDING_SONGS =
+  'SELECT * FROM pending_songs ORDER BY songbook_id ASC, number ASC';
+
 // One-time queries below this line! Should only be called by TEST cases :)
 export const QUERY_CREATE_SONGBOOKS_TABLE = `
     CREATE TABLE IF NOT EXISTS songbooks (
@@ -132,4 +157,18 @@ export const QUERY_CREATE_LYRICS_TABLE = `
 `.trim();
 
 export const QUERY_CREATE_PENDING_SONGS_TABLE = `
-`;
+    CREATE TABLE IF NOT EXISTS pending_songs (
+        id uuid PRIMARY KEY,
+        songbook_id varchar(50) REFERENCES songbooks(id),
+        number integer NOT NULL,
+        title varchar(500) NOT NULL,
+        author varchar(500) NOT NULL,
+        music varchar(500) NOT NULL,
+        presentation_order text NOT NULL,
+        image_url text NOT NULL,
+        audio_url text NOT NULL,
+        lyrics text NOT NULL,
+        inserted_dt timestamptz NOT NULL,
+        updated_dt timestamptz NOT NULL
+    );
+`.trim();

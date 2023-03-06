@@ -46,6 +46,20 @@ export interface DbSongWithLyrics {
   lyrics: DbLyric[];
 }
 
+// Data object for pending_songs table
+export interface DbPendingSong {
+  id: string; // uuid
+  songbookId: string;
+  number: number;
+  title: string;
+  author: string;
+  music: string;
+  presentationOrder: string;
+  imageUrl: string;
+  audioUrl: string;
+  lyrics: DbLyric[];
+}
+
 /**
  * Converts an object to a DbSongbook object.
  */
@@ -55,7 +69,7 @@ export function toDbSongbook(data: any): DbSongbook {
     fullName: data.fullName ?? '',
     staticMetadataLink: data.staticMetadataLink ?? '',
     imageUrl: data.imageUrl ?? '',
-    openToNewSongs: data.openToNewSongs ?? false
+    openToNewSongs: data.openToNewSongs ?? false,
   };
 }
 
@@ -85,5 +99,23 @@ export function toDbLyric(data: any): DbLyric {
     lyricType: data.lyricType ?? '',
     verseNumber: data.verseNumber ?? 0,
     lyrics: data.lyrics ?? '',
+  };
+}
+
+/**
+ * Converts an object to a DbPendingSong object.
+ */
+export function toDbPendingSong(data: any): DbPendingSong {
+  return {
+    id: data.id ?? '',
+    songbookId: data.songbookId ?? '',
+    number: data.number ?? 0,
+    title: data.title ?? '',
+    author: data.author ?? '',
+    music: data.music ?? '',
+    presentationOrder: data.presentationOrder ?? '',
+    imageUrl: data.imageUrl ?? '',
+    audioUrl: data.audioUrl ?? '',
+    lyrics: JSON.parse(data.lyrics ?? '[]'),
   };
 }

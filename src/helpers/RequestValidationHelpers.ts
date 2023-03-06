@@ -1,4 +1,4 @@
-import {DbLyric, DbSong, DbSongbook} from '../db/DbModels';
+import {DbLyric, DbPendingSong, DbSong, DbSongbook} from '../db/DbModels';
 import {isNumeric} from '../utils/StringUtils';
 import {ValidationError} from './ErrorHelpers';
 import {v4 as uuidv4, validate} from 'uuid';
@@ -30,6 +30,19 @@ export function validateInsertLyricRequest(lyric: DbLyric) {
   validateUuid(lyric.songId, 'songId');
   validateIntegerGreaterThanZero(lyric.verseNumber, 'verseNumber');
   validateString(lyric.lyrics, 'lyrics');
+}
+
+/**
+ * Validates the request of InsertPendingSongAPI
+ */
+export function validateInsertPendingSongRequest(pendingSong: DbPendingSong) {
+  validateUuid(pendingSong.id, 'id');
+  validateString(pendingSong.songbookId, 'songbookId');
+  validateIntegerGreaterThanZero(pendingSong.number, 'number');
+  validateString(pendingSong.title, 'title');
+  validateString(pendingSong.author, 'author');
+  validateString(pendingSong.presentationOrder, 'presentationOrder');
+  pendingSong.lyrics.forEach((lyric) => validateInsertLyricRequest(lyric));
 }
 
 /**
