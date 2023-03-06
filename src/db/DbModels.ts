@@ -2,14 +2,13 @@
  * Data Models for inserting and retrieving rows from the database
  */
 
-import {v4 as uuidv4} from 'uuid';
-
 // Data object for Songbooks table
 export interface DbSongbook {
   id: string;
   fullName: string;
   staticMetadataLink: string;
   imageUrl: string;
+  openToNewSongs: boolean;
 }
 
 // Data object for Songs table
@@ -56,6 +55,7 @@ export function toDbSongbook(data: any): DbSongbook {
     fullName: data.fullName ?? '',
     staticMetadataLink: data.staticMetadataLink ?? '',
     imageUrl: data.imageUrl ?? '',
+    openToNewSongs: data.openToNewSongs ?? false
   };
 }
 

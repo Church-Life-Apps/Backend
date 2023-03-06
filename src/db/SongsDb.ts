@@ -85,7 +85,8 @@ export class SongsDb {
         songbook.id,
         songbook.fullName,
         songbook.staticMetadataLink,
-        songbook.imageUrl
+        songbook.imageUrl,
+        songbook.openToNewSongs
       )
     ).then((rows) => {
       if (rows.length > 0) {
@@ -150,6 +151,7 @@ export class SongsDb {
       fullName: row.full_name ?? '',
       staticMetadataLink: row.static_metadata_link ?? '',
       imageUrl: row.image_url ?? '',
+      openToNewSongs: row.open_to_new_songs ?? false,
     };
   }
 
