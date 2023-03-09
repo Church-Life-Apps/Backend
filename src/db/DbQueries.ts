@@ -2,6 +2,7 @@
  * Strings and functions for DB Queries
  */
 
+import {formatForDbEntry} from '../utils/StringUtils';
 import {DbLyric, LyricType} from './DbModels';
 
 // Normal Queries
@@ -96,7 +97,8 @@ export function buildInsertPendingSongQuery(
         INSERT INTO pending_songs
         (id, songbook_id, number, title, author, music, presentation_order, image_url, audio_url, lyrics, inserted_dt, updated_dt)
         VALUES ('${id}', '${songbookId}', ${number}, '${title}', '${author}', '${music}', '${presentationOrder}',
-        '${imageUrl}', '${audioUrl}', '${JSON.stringify(lyrics)}', now(), now())
+        '${imageUrl}', '${audioUrl}', 
+        '${formatForDbEntry(JSON.stringify(lyrics))}', now(), now())
         ON CONFLICT DO NOTHING
         RETURNING *
     `.trim();

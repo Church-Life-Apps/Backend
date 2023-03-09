@@ -2,6 +2,8 @@
  * Data Models for inserting and retrieving rows from the database
  */
 
+import {json} from 'stream/consumers';
+
 // Data object for Songbooks table
 export interface DbSongbook {
   id: string;
@@ -106,6 +108,9 @@ export function toDbLyric(data: any): DbLyric {
  * Converts an object to a DbPendingSong object.
  */
 export function toDbPendingSong(data: any): DbPendingSong {
+  const lyrics: DbLyric[] = data.lyrics.map((lyricJson: any) => {
+    return toDbLyric(lyricJson);
+  });
   return {
     id: data.id ?? '',
     songbookId: data.songbookId ?? '',
@@ -116,6 +121,6 @@ export function toDbPendingSong(data: any): DbPendingSong {
     presentationOrder: data.presentationOrder ?? '',
     imageUrl: data.imageUrl ?? '',
     audioUrl: data.audioUrl ?? '',
-    lyrics: JSON.parse(data.lyrics ?? '[]'),
+    lyrics: lyrics,
   };
 }

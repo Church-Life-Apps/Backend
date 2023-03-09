@@ -101,8 +101,8 @@ const testSongUpdated = {
   author: 'new author',
   music: 'new music',
   presentationOrder: 'v1 v1 v1 v1 v1',
-  imageUrl: 'new song iamge url',
-  audioUrl: 'new audio url',
+  imageUrl: 'new song image url',
+  audioUrl: 'new song audio url',
 };
 
 const testLyrics: DbLyric[] = [
@@ -224,7 +224,7 @@ describe('Test Database Tables', () => {
     const inserted = await songsDb.insertPendingSong(testPendingSong);
     assertJsonEquality(inserted, testPendingSong);
 
-    const queried = await  songsDb.queryPendingSongs();
+    const queried = await songsDb.queryPendingSongs();
     assertJsonEquality(queried, [testPendingSong]);
 
     const inserted2 = await songsDb.insertPendingSong(testPendingSongUpdated);
