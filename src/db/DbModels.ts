@@ -60,6 +60,9 @@ export interface DbPendingSong {
   imageUrl: string;
   audioUrl: string;
   lyrics: DbLyric[];
+  requesterName: string;
+  requesterEmail: string;
+  requesterNote: string;
 }
 
 /**
@@ -122,5 +125,25 @@ export function toDbPendingSong(data: any): DbPendingSong {
     imageUrl: data.imageUrl ?? '',
     audioUrl: data.audioUrl ?? '',
     lyrics: lyrics,
+    requesterName: data.requesterName,
+    requesterEmail: data.requesterEmail,
+    requesterNote: data.requesterNote,
+  };
+}
+
+/**
+ * Converts a DbPendingSong to a DbSong object.
+ */
+export function pendingSongToSong(pendingSong: DbPendingSong): DbSong {
+  return {
+    id: pendingSong.id ?? '',
+    songbookId: pendingSong.songbookId ?? '',
+    number: pendingSong.number ?? 0,
+    title: pendingSong.title ?? '',
+    author: pendingSong.author ?? '',
+    music: pendingSong.music ?? '',
+    presentationOrder: pendingSong.presentationOrder ?? '',
+    imageUrl: pendingSong.imageUrl ?? '',
+    audioUrl: pendingSong.audioUrl ?? '',
   };
 }

@@ -48,19 +48,27 @@ export function buildUpsertSongQuery(
     `.trim();
 }
 
-export function buildInsertLyricQuery(
+export function buildUpsertLyricQuery(
   songId: string,
   lyricType: LyricType,
   verseNumber: number,
   lyrics: string
 ): string {
   return `
-        INSERT INTO lyrics
+        INSERT INTO lyrics 
         (song_id, lyric_type, verse_number, lyrics, inserted_dt, updated_dt)
         VALUES ('${songId}', '${lyricType}', ${verseNumber}, '${lyrics}', now(), now())
-        ON CONFLICT DO NOTHING
+        ON CONFLICT (song_id, lyric_type, verse_number) DO UPDATE SET
+        lyrics = '${lyrics}', updated_dt = now()
+        WHERE lyrics.song_id = '${songId}' AND lyrics.lyric_type = '${lyricType}' AND lyrics.verse_number = ${verseNumber}
         RETURNING *
     `.trim();
+}
+
+export function buildDeleteLyricsForSongQuery(songId: string): string {
+  return `
+    DELETE FROM lyrics WHERE song_id = '${songId}'
+  `.trim();
 }
 
 export function buildGetSongsForSongbookQuery(songbookId: string): string {
@@ -91,14 +99,18 @@ export function buildInsertPendingSongQuery(
   presentationOrder: string,
   imageUrl: string,
   audioUrl: string,
-  lyrics: DbLyric[]
+  lyricsJsonString: string,
+  requesterName: string,
+  requesterEmail: string,
+  requesterNote: string
 ): string {
   return `
         INSERT INTO pending_songs
-        (id, songbook_id, number, title, author, music, presentation_order, image_url, audio_url, lyrics, inserted_dt, updated_dt)
+        (id, songbook_id, number, title, author, music, presentation_order, image_url, audio_url, lyrics, 
+          requester_name, requester_email, requester_note, inserted_dt, updated_dt)
         VALUES ('${id}', '${songbookId}', ${number}, '${title}', '${author}', '${music}', '${presentationOrder}',
-        '${imageUrl}', '${audioUrl}', 
-        '${formatForDbEntry(JSON.stringify(lyrics))}', now(), now())
+        '${imageUrl}', '${audioUrl}', '${lyricsJsonString}', '${requesterName}', '${requesterEmail}', 
+        '${requesterNote}', now(), now())
         ON CONFLICT DO NOTHING
         RETURNING *
     `.trim();
@@ -106,6 +118,14 @@ export function buildInsertPendingSongQuery(
 
 export const QUERY_SELECT_FROM_PENDING_SONGS =
   'SELECT * FROM pending_songs ORDER BY songbook_id ASC, number ASC';
+
+export function buildGetPendingSongByIdQuery(id: string): string {
+  return `SELECT * FROM pending_songs WHERE id = '${id}'`;
+}
+
+export function buildDeletePendingSongByIdQuery(id: string): string {
+  return `DELETE FROM pending_songs WHERE id = '${id}' RETURNING *`;
+}
 
 // One-time queries below this line! Should only be called by TEST cases :)
 export const QUERY_CREATE_SONGBOOKS_TABLE = `
@@ -170,6 +190,9 @@ export const QUERY_CREATE_PENDING_SONGS_TABLE = `
         image_url text NOT NULL,
         audio_url text NOT NULL,
         lyrics text NOT NULL,
+        requester_name varchar(500) NOT NULL,
+        requester_email varchar(500) NOT NULL,
+        requester_note text NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL
     );
