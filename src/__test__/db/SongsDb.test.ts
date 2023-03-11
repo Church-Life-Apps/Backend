@@ -74,6 +74,9 @@ const songAudioUrl = 'song_audio_url';
 const verse1 = 'Some lyrics for the first verse';
 const verse2 = 'More lyrics for the second verse';
 const chorus = 'Final lyrics for the chorus';
+const requesterName = 'requester name';
+const requesterEmail = 'requester email';
+const requesterNote = 'requester note';
 
 const testSongbook: DbSongbook = {
   id: songbookId,
@@ -142,6 +145,9 @@ const testPendingSong: DbPendingSong = {
   imageUrl: songImageUrl,
   audioUrl: songAudioUrl,
   lyrics: testLyrics,
+  requesterName: requesterName,
+  requesterEmail: requesterEmail,
+  requesterNote: requesterNote,
 };
 
 const testPendingSongUpdated: DbPendingSong = {
@@ -198,9 +204,9 @@ describe('Test Database Tables', () => {
   test(`Insert Lyrics and Get Lyric Functions`, async () => {
     await songsDb.insertSongbook(testSongbook);
     await songsDb.upsertSong(testSong);
-    const inserted1 = await songsDb.insertLyric(testLyrics[0]);
-    const inserted2 = await songsDb.insertLyric(testLyrics[1]);
-    const inserted3 = await songsDb.insertLyric(testLyrics[2]);
+    const inserted1 = await songsDb.upsertLyric(testLyrics[0]);
+    const inserted2 = await songsDb.upsertLyric(testLyrics[1]);
+    const inserted3 = await songsDb.upsertLyric(testLyrics[2]);
     assertJsonEquality([inserted1, inserted2, inserted3], testLyrics);
 
     const queriedSongWithLyrics = await songsDb.querySongWithLyrics(
@@ -209,12 +215,15 @@ describe('Test Database Tables', () => {
     );
     assertJsonEquality(queriedSongWithLyrics, testSongWithLyrics);
 
-    assertFails(
-      () => songsDb.insertLyric(testLyrics[0]),
-      'Insert lyric should fail due to duplicate verse.'
-    );
-    assertFails(
-      () => songsDb.insertLyric({...testLyrics[0], songId: uuidv4()}),
+    const newLyric: DbLyric = {
+      ...testLyrics[0],
+      lyrics: 'new "lyric" for update\'s',
+    };
+    const updated = await songsDb.upsertLyric(newLyric);
+    assertJsonEquality(updated, newLyric);
+
+    await assertFails(
+      () => songsDb.upsertLyric({...testLyrics[0], songId: uuidv4()}),
       'Insert lyric should fail due to no song id'
     );
   });
@@ -233,13 +242,78 @@ describe('Test Database Tables', () => {
     const queried2 = await songsDb.queryPendingSongs();
     assertJsonEquality(queried2, [testPendingSong, testPendingSongUpdated]);
   });
+
+  test(`Reject Pending Song Function`, async () => {
+    await songsDb.insertSongbook(testSongbook);
+    await songsDb.insertPendingSong(testPendingSong);
+    const deleted = await songsDb.deletePendingSong(testPendingSong.id);
+
+    assertJsonEquality(deleted, testPendingSong);
+
+    const queried = await songsDb.queryPendingSongs();
+    assertJsonEquality(queried, []);
+
+    const nullSong = await songsDb.deletePendingSong(uuidv4());
+    expect(nullSong).toBe(null);
+  });
+
+  test(`Accept Pending Song Function`, async () => {
+    await songsDb.insertSongbook(testSongbook);
+    await assertFails(
+      () => songsDb.acceptPendingSong(testPendingSong),
+      'Accept pending song should fail when there is no pending song present.'
+    );
+    await assertFails(
+      () => songsDb.querySongWithLyrics(songbookId, number),
+      'Should have no song still'
+    );
+    const inserted = await songsDb.insertPendingSong(testPendingSong);
+    assertJsonEquality(inserted, testPendingSong);
+
+    await songsDb.acceptPendingSong(testPendingSong);
+    await assertFails(
+      () => songsDb.getPendingSongById(testPendingSong.id),
+      'Pending song should have been deleted'
+    );
+
+    const createdSong = await songsDb.querySongWithLyrics(songbookId, number);
+    assertJsonEquality(createdSong, testSongWithLyrics);
+
+    const newTitle = 'new title';
+    const updatedPendingSong: DbPendingSong = {
+      ...testPendingSong,
+      id: uuidv4(),
+      title: newTitle,
+      lyrics: testLyrics.slice(0, 2),
+    };
+
+    const updatedInserted = await songsDb.insertPendingSong(updatedPendingSong);
+    assertJsonEquality(updatedInserted, updatedPendingSong);
+
+    await songsDb.acceptPendingSong(updatedPendingSong);
+
+    const expectedUpdated: DbSongWithLyrics = {
+      song: {
+        ...testSong,
+        title: newTitle,
+      },
+      lyrics: testLyrics.slice(0, 2),
+    };
+    const updatedSong = await songsDb.querySongWithLyrics(songbookId, number);
+    assertJsonEquality(updatedSong, expectedUpdated);
+
+    const remainingPendingSongs = await songsDb.queryPendingSongs();
+    assertJsonEquality(remainingPendingSongs, []);
+  });
 });
 
 async function assertFails(func: () => Promise<any>, message: string) {
   try {
     await func();
-    fail(`Manually failing due to: ${message}`);
-  } catch (e: any) {}
+  } catch (e: any) {
+    return;
+  }
+  fail(`Manually failing due to: ${message}`);
 }
 
 function assertJsonEquality(one: any, two: any) {

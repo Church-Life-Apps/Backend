@@ -9,16 +9,22 @@ import {
   toDbPendingSong,
 } from './db/DbModels';
 import {
+  validateAcceptPendingSongRequest,
   validateGetSongRequest,
   validateGetSongsRequest,
   validateInsertLyricRequest,
   validateInsertPendingSongRequest,
   validateInsertSongbookRequest,
   validateInsertSongRequest,
+  validateRejectPendingSongRequest,
 } from './helpers/RequestValidationHelpers';
 import {SongsService} from './services/SongsService';
 import {Response} from 'express-serve-static-core';
 import {DatabaseError, ValidationError} from './helpers/ErrorHelpers';
+import {
+  toAcceptPendingSongRequest,
+  toRejectPendingSongRequest,
+} from './helpers/ApiHelpers';
 
 dotenv.config();
 
@@ -37,7 +43,7 @@ app.get('/hi', (req, res) => {
 });
 
 // List Songbooks API
-app.get('/songbooks', async (_req, res) => {
+app.get('/api/songbooks', async (_req, res) => {
   try {
     res.send(await songsService.getSongbooks());
   } catch (e: any) {
@@ -46,7 +52,7 @@ app.get('/songbooks', async (_req, res) => {
 });
 
 // List Songs API
-app.get('/songs', async (req, res) => {
+app.get('/api/songs', async (req, res) => {
   try {
     const songbookId = (req.query.songbookId as string) ?? '';
     validateGetSongsRequest(songbookId);
@@ -57,7 +63,7 @@ app.get('/songs', async (req, res) => {
 });
 
 // Get Song [With Lyrics] API
-app.get('/song', async (req, res) => {
+app.get('/api/song', async (req, res) => {
   try {
     const songbookId = (req.query.songbookId as string) ?? '';
     const number = (req.query.number as string) ?? '';
@@ -71,7 +77,7 @@ app.get('/song', async (req, res) => {
 });
 
 // List Pending Songs API
-app.get('/pendingsongs', async (_req, res) => {
+app.get('/api/pendingsongs', async (_req, res) => {
   try {
     res.send(await songsService.getPendingSongs());
   } catch (e: any) {
@@ -80,7 +86,8 @@ app.get('/pendingsongs', async (_req, res) => {
 });
 
 // Create Songbook API
-app.post('/songbook', async (req, res) => {
+// TODO: Make this a "protected"/internal API
+app.post('/api/songbook', async (req, res) => {
   try {
     console.log(`Create Songbook API Request received: ${req.url}`);
     const dbSongbook = toDbSongbook(req.body);
@@ -94,7 +101,8 @@ app.post('/songbook', async (req, res) => {
 });
 
 // Create Song API
-app.post('/song', async (req, res) => {
+// TODO: Make this a "protected"/internal API
+app.post('/api/song', async (req, res) => {
   try {
     console.log(`Create Song API Request received: ${req.url}`);
     const dbSong = toDbSong(req.body);
@@ -108,7 +116,8 @@ app.post('/song', async (req, res) => {
 });
 
 // Create Lyric API
-app.post('/lyric', async (req, res) => {
+// TODO: Make this a "protected"/internal API
+app.post('/api/lyric', async (req, res) => {
   try {
     console.log(`Create Lyric API Request received: ${req.url}`);
     const dbLyric = toDbLyric(req.body);
@@ -122,7 +131,7 @@ app.post('/lyric', async (req, res) => {
 });
 
 // Create Pending Song API
-app.post('/pendingsong', async (req, res) => {
+app.post('/api/pendingsong', async (req, res) => {
   try {
     console.log(`Create Pending Song API Request received: ${req.url}`);
     const pendingSong = toDbPendingSong(req.body);
@@ -130,6 +139,38 @@ app.post('/pendingsong', async (req, res) => {
     const val = await songsService.insertPendingSongMethod(pendingSong);
     console.log(`Returning ${JSON.stringify(val)}`);
     res.send(val ?? {});
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+});
+
+// TODO: Make this a "protected"/internal API
+app.post('/api/rejectpendingsong', async (req, res) => {
+  try {
+    console.log(`Reject Pending Song API Request received: ${req.url}`);
+    const request = toRejectPendingSongRequest(req.body);
+    validateRejectPendingSongRequest(request);
+    const success = await songsService.rejectPendingSongMethod(
+      request.pendingSong,
+      request.rejectionReason
+    );
+    res.send(`{"success": "${success}"`);
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+});
+
+// TODO: Make this a "protected"/internal API
+app.post('/api/acceptpendingsong', async (req, res) => {
+  try {
+    console.log(`Accept Pending Song API Request received: ${req.url}`);
+    const request = toAcceptPendingSongRequest(req.body);
+    validateAcceptPendingSongRequest(request);
+    const success = await songsService.acceptPendingSongMethod(
+      request.pendingSong,
+      request.acceptanceNote
+    );
+    res.send(`{"success": "${success}"`);
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }

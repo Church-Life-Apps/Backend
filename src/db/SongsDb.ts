@@ -2,7 +2,7 @@
  * Database Layer Code
  */
 
-import {Pool} from 'pg';
+import {Pool, PoolClient} from 'pg';
 import {DatabaseError} from '../helpers/ErrorHelpers';
 import {formatForDbEntry} from '../utils/StringUtils';
 import {
@@ -13,14 +13,17 @@ import {
   DbSongWithLyrics,
 } from './DbModels';
 import {
+  buildDeletePendingSongByIdQuery,
+  buildGetPendingSongByIdQuery,
   buildGetSongsForSongbookQuery,
   buildGetSongWithLyricsQuery,
-  buildInsertLyricQuery,
+  buildUpsertLyricQuery,
   buildInsertPendingSongQuery,
   buildInsertSongbookQuery,
   buildUpsertSongQuery,
   QUERY_SELECT_FROM_PENDING_SONGS,
   QUERY_SELECT_FROM_SONGBOOKS,
+  buildDeleteLyricsForSongQuery,
 } from './DbQueries';
 require('dotenv').config();
 
@@ -94,6 +97,18 @@ export class SongsDb {
   }
 
   /**
+   * Gets row from pending_songs table by id
+   */
+  async getPendingSongById(id: string): Promise<DbPendingSong> {
+    return await this.queryDb(buildGetPendingSongByIdQuery(id)).then((rows) => {
+      if (rows.length <= 0) {
+        throw new DatabaseError(`No Pending Song found for id: ${id}`);
+      }
+      return this.mapDbPendingSong(rows);
+    });
+  }
+
+  /**
    * Inserts a DbSongbook into the songbooks table
    */
   async insertSongbook(songbook: DbSongbook): Promise<DbSongbook> {
@@ -126,7 +141,7 @@ export class SongsDb {
         formatForDbEntry(song.title),
         formatForDbEntry(song.author),
         formatForDbEntry(song.music),
-        song.presentationOrder,
+        formatForDbEntry(song.presentationOrder),
         song.imageUrl,
         song.audioUrl
       )
@@ -140,11 +155,11 @@ export class SongsDb {
   }
 
   /**
-   * Inserts a DbLyric into the lyrics table
+   * Inserts or updates a DbLyric into the lyrics table
    */
-  async insertLyric(lyric: DbLyric): Promise<DbLyric> {
+  async upsertLyric(lyric: DbLyric): Promise<DbLyric> {
     return await this.queryDb(
-      buildInsertLyricQuery(
+      buildUpsertLyricQuery(
         lyric.songId,
         lyric.lyricType,
         lyric.verseNumber,
@@ -174,7 +189,10 @@ export class SongsDb {
         pendingSong.presentationOrder,
         pendingSong.imageUrl,
         pendingSong.audioUrl,
-        pendingSong.lyrics
+        formatForDbEntry(JSON.stringify(pendingSong.lyrics)),
+        formatForDbEntry(pendingSong.requesterName),
+        formatForDbEntry(pendingSong.requesterEmail),
+        formatForDbEntry(pendingSong.requesterNote)
       )
     ).then((rows) => {
       if (rows.length > 0) {
@@ -183,6 +201,99 @@ export class SongsDb {
         throw new DatabaseError('Unable to insert pending song.');
       }
     });
+  }
+
+  /**
+   * Deletes a DbPendingSong row based on id
+   */
+  async deletePendingSong(id: string): Promise<DbPendingSong | null> {
+    return await this.queryDb(buildDeletePendingSongByIdQuery(id)).then(
+      (rows) => {
+        if (rows.length > 0) {
+          return this.mapDbPendingSong(rows[0]);
+        } else {
+          return null;
+        }
+      }
+    );
+  }
+
+  /**
+   * Accepts a Pending Song.
+   *
+   * In a Db Transaction:
+   * 1. Delete the row in the 'pending_songs' table which has the same id.
+   * 2. Insert or Update the row in the 'songs' table which this pendingSong pertains to.
+   * 3. Delete the rows in the 'lyrics' table that the song had previously.
+   * 4. Insert new rows in the 'lyrics' table which these lyrics pertain to.
+   * If any of the steps above fails, then roll back the transaction and there should be no change to the database.
+   * If all 4 steps above succeed, then commit the transaction and return the updated song.
+   */
+  async acceptPendingSong(pendingSong: DbPendingSong): Promise<void> {
+    const client: PoolClient = await this.pool.connect();
+    try {
+      // Start Transaction
+      await this.queryWithLog('BEGIN', client);
+      // Delete Pending Song - If it's empty then throw due to no prior pending song.
+      await this.queryWithLog(
+        buildDeletePendingSongByIdQuery(pendingSong.id),
+        client
+      ).then((res) => {
+        if (res.rows.length <= 0) {
+          throw new DatabaseError(`Pending Song ${pendingSong.id} not found.`);
+        }
+      });
+
+      // Update the existing song, and use the response.
+      const upsertSongResponse = await this.queryWithLog(
+        buildUpsertSongQuery(
+          pendingSong.id,
+          pendingSong.songbookId,
+          pendingSong.number,
+          formatForDbEntry(pendingSong.title),
+          formatForDbEntry(pendingSong.author),
+          formatForDbEntry(pendingSong.music),
+          formatForDbEntry(pendingSong.presentationOrder),
+          pendingSong.imageUrl,
+          pendingSong.audioUrl
+        ),
+        client
+      );
+      if (upsertSongResponse.rows.length <= 0) {
+        throw new DatabaseError(
+          `Failed to make updates to 'songs' table for pending song request ${pendingSong.title}; ${pendingSong.songbookId}: ${pendingSong.number}`
+        );
+      }
+      const updatedSongId = upsertSongResponse.rows[0].id;
+
+      // Delete prior lyrics for this song
+      await this.queryWithLog(
+        buildDeleteLyricsForSongQuery(updatedSongId),
+        client
+      );
+
+      // Insert new lyrics for this song
+      pendingSong.lyrics.forEach(async (lyric) => {
+        await this.queryWithLog(
+          buildUpsertLyricQuery(
+            updatedSongId,
+            lyric.lyricType,
+            lyric.verseNumber,
+            formatForDbEntry(lyric.lyrics)
+          ),
+          client
+        );
+      });
+
+      // If all went well, then commit the transaction.
+      await this.queryWithLog('COMMIT', client);
+    } catch (e: any) {
+      // If there was an error along the way then roll the whole transaction back.
+      await this.queryWithLog('ROLLBACK', client);
+      throw e;
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -242,6 +353,9 @@ export class SongsDb {
       imageUrl: row.image_url ?? '',
       audioUrl: row.audio_url ?? '',
       lyrics: JSON.parse(row.lyrics ?? '[]'),
+      requesterName: row.requester_name ?? '',
+      requesterEmail: row.requester_email ?? '',
+      requesterNote: row.requester_note ?? '',
     };
   }
 
@@ -290,6 +404,11 @@ export class SongsDb {
       .catch((err) => {
         console.error(`Error due to: ${err}.`, err);
       });
+  }
+
+  private async queryWithLog(query: string, client: PoolClient) {
+    console.log(`Database Query: "${query}".`);
+    return await client.query(query);
   }
 
   /** One time set up function. Never needs to be called again unless our DB gets nuked.
