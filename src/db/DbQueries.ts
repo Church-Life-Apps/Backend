@@ -52,14 +52,15 @@ export function buildUpsertLyricQuery(
   songId: string,
   lyricType: LyricType,
   verseNumber: number,
-  lyrics: string
+  lyrics: string,
+  searchLyrics: string,
 ): string {
   return `
         INSERT INTO lyrics 
-        (song_id, lyric_type, verse_number, lyrics, inserted_dt, updated_dt)
-        VALUES ('${songId}', '${lyricType}', ${verseNumber}, '${lyrics}', now(), now())
+        (song_id, lyric_type, verse_number, lyrics, search_lyrics, inserted_dt, updated_dt)
+        VALUES ('${songId}', '${lyricType}', ${verseNumber}, '${lyrics}', '${searchLyrics}', now(), now())
         ON CONFLICT (song_id, lyric_type, verse_number) DO UPDATE SET
-        lyrics = '${lyrics}', updated_dt = now()
+        lyrics = '${lyrics}', search_lyrics='${searchLyrics}', updated_dt = now()
         WHERE lyrics.song_id = '${songId}' AND lyrics.lyric_type = '${lyricType}' AND lyrics.verse_number = ${verseNumber}
         RETURNING *
     `.trim();
@@ -172,6 +173,7 @@ export const QUERY_CREATE_LYRICS_TABLE = `
         lyric_type lyric_type NOT NULL,
         verse_number integer NOT NULL,
         lyrics text NOT NULL,
+        search_lyrics text NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL,
         PRIMARY KEY (song_id, lyric_type, verse_number)

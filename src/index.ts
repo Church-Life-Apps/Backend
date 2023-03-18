@@ -3,12 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import * as path from 'path';
 import {
-  toDbLyric,
-  toDbSong,
-  toDbSongbook,
-  toDbPendingSong,
-} from './db/DbModels';
-import {
   validateAcceptPendingSongRequest,
   validateGetSongRequest,
   validateGetSongsRequest,
@@ -25,6 +19,7 @@ import {
   toAcceptPendingSongRequest,
   toRejectPendingSongRequest,
 } from './helpers/ApiHelpers';
+import {toLyric, toPendingSong, toSong, toSongbook} from './models/ApiModels';
 
 dotenv.config();
 
@@ -90,9 +85,9 @@ app.get('/api/pendingsongs', async (_req, res) => {
 app.post('/api/songbook', async (req, res) => {
   try {
     console.log(`Create Songbook API Request received: ${req.url}`);
-    const dbSongbook = toDbSongbook(req.body);
-    validateInsertSongbookRequest(dbSongbook);
-    const val = await songsService.insertSongbookMethod(dbSongbook);
+    const songbook = toSongbook(req.body);
+    validateInsertSongbookRequest(songbook);
+    const val = await songsService.insertSongbookMethod(songbook);
     console.log(`Returning ${JSON.stringify(val)}`);
     res.send(val ?? {});
   } catch (e: any) {
@@ -105,9 +100,9 @@ app.post('/api/songbook', async (req, res) => {
 app.post('/api/song', async (req, res) => {
   try {
     console.log(`Create Song API Request received: ${req.url}`);
-    const dbSong = toDbSong(req.body);
-    validateInsertSongRequest(dbSong);
-    const val = await songsService.upsertSongMethod(dbSong);
+    const song = toSong(req.body);
+    validateInsertSongRequest(song);
+    const val = await songsService.upsertSongMethod(song);
     console.log(`Returning ${JSON.stringify(val)}`);
     res.send(val ?? {});
   } catch (e: any) {
@@ -120,9 +115,9 @@ app.post('/api/song', async (req, res) => {
 app.post('/api/lyric', async (req, res) => {
   try {
     console.log(`Create Lyric API Request received: ${req.url}`);
-    const dbLyric = toDbLyric(req.body);
-    validateInsertLyricRequest(dbLyric);
-    const val = await songsService.insertLyricMethod(dbLyric);
+    const lyric = toLyric(req.body);
+    validateInsertLyricRequest(lyric);
+    const val = await songsService.insertLyricMethod(lyric);
     console.log(`Returning ${JSON.stringify(val)}`);
     res.send(val ?? {});
   } catch (e: any) {
@@ -134,7 +129,7 @@ app.post('/api/lyric', async (req, res) => {
 app.post('/api/pendingsong', async (req, res) => {
   try {
     console.log(`Create Pending Song API Request received: ${req.url}`);
-    const pendingSong = toDbPendingSong(req.body);
+    const pendingSong = toPendingSong(req.body);
     validateInsertPendingSongRequest(pendingSong);
     const val = await songsService.insertPendingSongMethod(pendingSong);
     console.log(`Returning ${JSON.stringify(val)}`);
