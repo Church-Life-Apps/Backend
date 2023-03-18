@@ -163,8 +163,9 @@ export class SongsDb {
         lyric.songId,
         lyric.lyricType,
         lyric.verseNumber,
-        formatForDbEntry(lyric.lyrics)
-      )
+        formatForDbEntry(lyric.lyrics),
+        formatForDbEntry(lyric.searchLyrics)
+        )
     ).then((rows) => {
       if (rows.length > 0) {
         return this.mapDbLyric(rows[0]);
@@ -279,7 +280,8 @@ export class SongsDb {
             updatedSongId,
             lyric.lyricType,
             lyric.verseNumber,
-            formatForDbEntry(lyric.lyrics)
+            formatForDbEntry(lyric.lyrics),
+            formatForDbEntry(lyric.searchLyrics)
           ),
           client
         );
@@ -335,6 +337,7 @@ export class SongsDb {
       lyricType: row.lyric_type ?? '',
       verseNumber: row.verse_number ?? '',
       lyrics: row.lyrics ?? '',
+      searchLyrics: row.search_lyrics ?? '',
     };
   }
 

@@ -1,12 +1,12 @@
-import {
-  DbLyric,
-  DbPendingSong,
-  DbSong,
-  DbSongbook,
-  DbSongWithLyrics,
-  pendingSongToSong,
-} from '../db/DbModels';
 import {SongsDb} from '../db/SongsDb';
+import {
+  Lyric,
+  PendingSong,
+  Song,
+  Songbook,
+  SongWithLyrics,
+} from '../models/ApiModels';
+import {toDbLyric, toDbPendingSong} from '../models/ModelConversion';
 
 export class SongsService {
   songsDb: SongsDb;
@@ -16,26 +16,26 @@ export class SongsService {
   }
 
   // INSERT Functions
-  async insertSongbookMethod(songbook: DbSongbook): Promise<DbSongbook> {
+  async insertSongbookMethod(songbook: Songbook): Promise<Songbook> {
     return await this.songsDb.insertSongbook(songbook);
   }
 
-  async upsertSongMethod(song: DbSong): Promise<DbSong> {
+  async upsertSongMethod(song: Song): Promise<Song> {
     return await this.songsDb.upsertSong(song);
   }
 
-  async insertLyricMethod(lyric: DbLyric): Promise<DbLyric> {
-    return await this.songsDb.upsertLyric(lyric);
+  async insertLyricMethod(lyric: Lyric): Promise<Lyric> {
+    return await this.songsDb.upsertLyric(toDbLyric(lyric));
   }
 
   async insertPendingSongMethod(
-    pendingSong: DbPendingSong
-  ): Promise<DbPendingSong> {
-    return await this.songsDb.insertPendingSong(pendingSong);
+    pendingSong: PendingSong
+  ): Promise<PendingSong> {
+    return await this.songsDb.insertPendingSong(toDbPendingSong(pendingSong));
   }
 
   async rejectPendingSongMethod(
-    pendingSong: DbPendingSong,
+    pendingSong: PendingSong,
     rejectionReason: string
   ): Promise<boolean> {
     const deletedSong = await this.songsDb.deletePendingSong(pendingSong.id);
@@ -52,10 +52,10 @@ export class SongsService {
   }
 
   async acceptPendingSongMethod(
-    pendingSong: DbPendingSong,
+    pendingSong: PendingSong,
     acceptanceNote: string
   ): Promise<boolean> {
-    await this.songsDb.acceptPendingSong(pendingSong);
+    await this.songsDb.acceptPendingSong(toDbPendingSong(pendingSong));
 
     console.log(
       `Accepted pending song: ${pendingSong.title}; Requested by: ${pendingSong.requesterName}; With acceptance note: ${acceptanceNote}`
@@ -67,22 +67,22 @@ export class SongsService {
   }
 
   // SELECT Functions
-  async getSongbooks(): Promise<DbSongbook[]> {
+  async getSongbooks(): Promise<Songbook[]> {
     return await this.songsDb.querySongbooks();
   }
 
-  async getSongsMethod(songbookId: string): Promise<DbSong[]> {
+  async getSongsMethod(songbookId: string): Promise<Song[]> {
     return await this.songsDb.querySongsForSongbook(songbookId);
   }
 
   async getSongWithLyricsMethod(
     songbookId: string,
     number: number
-  ): Promise<DbSongWithLyrics> {
+  ): Promise<SongWithLyrics> {
     return await this.songsDb.querySongWithLyrics(songbookId, number);
   }
 
-  async getPendingSongs(): Promise<DbPendingSong[]> {
+  async getPendingSongs(): Promise<PendingSong[]> {
     return await this.songsDb.queryPendingSongs();
   }
 }

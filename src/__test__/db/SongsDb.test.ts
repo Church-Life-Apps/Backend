@@ -16,6 +16,7 @@ import {
 } from '../../db/DbQueries';
 import {SongsDb} from '../../db/SongsDb';
 import {v4 as uuidv4} from 'uuid';
+import {formatForDbSearchColumn} from '../../utils/StringUtils';
 
 require('dotenv').config();
 
@@ -114,18 +115,21 @@ const testLyrics: DbLyric[] = [
     lyricType: LyricType.LYRIC_TYPE_VERSE,
     verseNumber: 1,
     lyrics: verse1,
+    searchLyrics: formatForDbSearchColumn(verse1),
   },
   {
     songId: songId,
     lyricType: LyricType.LYRIC_TYPE_VERSE,
     verseNumber: 2,
     lyrics: verse2,
+    searchLyrics: formatForDbSearchColumn(verse2),
   },
   {
     songId: songId,
     lyricType: LyricType.LYRIC_TYPE_CHORUS,
     verseNumber: 1,
     lyrics: chorus,
+    searchLyrics: formatForDbSearchColumn(chorus),
   },
 ];
 

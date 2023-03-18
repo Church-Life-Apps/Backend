@@ -1,35 +1,35 @@
-import {DbLyric, DbPendingSong, DbSong, DbSongbook} from '../db/DbModels';
 import {isNumeric} from '../utils/StringUtils';
 import {ValidationError} from './ErrorHelpers';
-import {v4 as uuidv4, validate} from 'uuid';
+import {validate} from 'uuid';
 import {AcceptPendingSongRequest, RejectPendingSongRequest} from './ApiHelpers';
+import {Songbook, Song, Lyric, PendingSong} from '../models/ApiModels';
 
 /**
  * Validates the request of InsertSongbook API
  */
-export function validateInsertSongbookRequest(songbook: DbSongbook) {
-  validateDbSongbook(songbook, '');
+export function validateInsertSongbookRequest(songbook: Songbook) {
+  validateSongbook(songbook, '');
 }
 
 /**
  * Validates the request of InsertSong API
  */
-export function validateInsertSongRequest(song: DbSong) {
-  validateDbSong(song, '');
+export function validateInsertSongRequest(song: Song) {
+  validateSong(song, '');
 }
 
 /**
  * Validates the request of InsertLyric API
  */
-export function validateInsertLyricRequest(lyric: DbLyric) {
-  validateDbLyric(lyric, '');
+export function validateInsertLyricRequest(lyric: Lyric) {
+  validateLyric(lyric, '');
 }
 
 /**
  * Validates the request of InsertPendingSongAPI
  */
-export function validateInsertPendingSongRequest(pendingSong: DbPendingSong) {
-  validateDbPendingSong(pendingSong, '');
+export function validateInsertPendingSongRequest(pendingSong: PendingSong) {
+  validatePendingSong(pendingSong, '');
 }
 
 /**
@@ -45,7 +45,7 @@ export function validateRejectPendingSongRequest(
 export function validateAcceptPendingSongRequest(
   request: AcceptPendingSongRequest
 ) {
-  validateDbPendingSong(request.pendingSong, 'pendingSong.');
+  validatePendingSong(request.pendingSong, 'pendingSong.');
   validateString(request.acceptanceNote, 'acceptanceNote');
 }
 
@@ -65,17 +65,17 @@ export function validateGetSongRequest(songbookId: string, number: string) {
 }
 
 /**
- * Validates a DbSongbook object.
+ * Validates a Songbook object.
  */
-function validateDbSongbook(songbook: DbSongbook, prefix: string) {
+function validateSongbook(songbook: Songbook, prefix: string) {
   validateString(songbook.id, `${prefix}id`);
   validateString(songbook.fullName, `${prefix}fullName`);
 }
 
 /**
- * Validates a DbSong object.
+ * Validates a Song object.
  */
-function validateDbSong(song: DbSong, prefix: string) {
+function validateSong(song: Song, prefix: string) {
   validateUuid(song.id, `${prefix}id`);
   validateString(song.songbookId, `${prefix}songbookId`);
   validateIntegerGreaterThanZero(song.number, `${prefix}number`);
@@ -84,18 +84,18 @@ function validateDbSong(song: DbSong, prefix: string) {
   validateString(song.presentationOrder, `${prefix}presentationOrder`);
 }
 /**
- * Validates a DbLyric object.
+ * Validates a Lyric object.
  */
-function validateDbLyric(lyric: DbLyric, prefix: string) {
+function validateLyric(lyric: Lyric, prefix: string) {
   validateUuid(lyric.songId, `${prefix}songId`);
   validateIntegerGreaterThanZero(lyric.verseNumber, `${prefix}verseNumber`);
   validateString(lyric.lyrics, `${prefix}lyrics`);
 }
 
 /**
- * Validates a DbPendingSong object.
+ * Validates a PendingSong object.
  */
-function validateDbPendingSong(pendingSong: DbPendingSong, prefix: string) {
+function validatePendingSong(pendingSong: PendingSong, prefix: string) {
   validateUuid(pendingSong.id, `${prefix}id`);
   validateString(pendingSong.songbookId, `${prefix}songbookId`);
   validateIntegerGreaterThanZero(pendingSong.number, `${prefix}number`);
@@ -103,7 +103,7 @@ function validateDbPendingSong(pendingSong: DbPendingSong, prefix: string) {
   validateString(pendingSong.author, `${prefix}author`);
   validateString(pendingSong.presentationOrder, `${prefix}presentationOrder`);
   pendingSong.lyrics.forEach((lyric) =>
-    validateDbLyric(lyric, `${prefix}.lyrics.`)
+    validateLyric(lyric, `${prefix}.lyrics.`)
   );
 }
 
