@@ -1,3 +1,4 @@
+import {DbSong} from '../db/DbModels';
 import {SongsDb} from '../db/SongsDb';
 import {
   Lyric,
@@ -5,8 +6,14 @@ import {
   Song,
   Songbook,
   SongWithLyrics,
+  SongWithMatchedText,
 } from '../models/ApiModels';
-import {toDbLyric, toDbPendingSong} from '../models/ModelConversion';
+import {
+  toSongWithMatchedText,
+  toDbLyric,
+  toDbPendingSong,
+} from '../models/ModelConversion';
+import {isNumeric} from '../utils/StringUtils';
 
 export class SongsService {
   songsDb: SongsDb;
@@ -84,5 +91,21 @@ export class SongsService {
 
   async getPendingSongs(): Promise<PendingSong[]> {
     return await this.songsDb.queryPendingSongs();
+  }
+
+  async searchSongs(
+    searchText: string,
+    songbook: string
+  ): Promise<SongWithMatchedText[]> {
+    let x: DbSong[];
+    if (isNumeric(searchText)) {
+      x = await this.songsDb.searchSongsByNumber(searchText, songbook);
+    } else {
+      x = await this.songsDb.searchSongsByText(searchText, songbook);
+    }
+    return x.map((song) => ({
+      song: song,
+      matchText: '',
+    }));
   }
 }

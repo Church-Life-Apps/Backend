@@ -17,6 +17,7 @@ import {
 import {SongsDb} from '../../db/SongsDb';
 import {v4 as uuidv4} from 'uuid';
 import {formatForDbSearchColumn} from '../../utils/StringUtils';
+import {Song} from '../../models/ApiModels';
 
 require('dotenv').config();
 
@@ -308,6 +309,61 @@ describe('Test Database Tables', () => {
 
     const remainingPendingSongs = await songsDb.queryPendingSongs();
     assertJsonEquality(remainingPendingSongs, []);
+  });
+
+  test('Search Functions', async () => {
+    const songbook2 = {...testSongbook, id: 'new', fullName: 'test new'};
+    await songsDb.insertSongbook(testSongbook);
+    await songsDb.insertSongbook(songbook2);
+
+    const song2: Song = {
+      ...testSong,
+      id: uuidv4(),
+      title: 'Life out of Death',
+      author: 'Watchman Nee',
+      music: 'Mozart',
+      number: 513,
+    };
+    const song3: Song = {
+      ...testSong,
+      id: uuidv4(),
+      title: 'Abiding and Confiding',
+      author: 'A. B. Simpson',
+      music: 'Mozart',
+      number: 450,
+    };
+    const song4: Song = {
+      ...testSong,
+      id: uuidv4(),
+      title: 'The Olive Without Crushing',
+      author: 'Watchman Nee',
+      music: 'Beethoven',
+      number: 5,
+    };
+    const song5: Song = {
+      ...testSong,
+      id: uuidv4(),
+      songbookId: 'new',
+      title: 'New Songbook Song',
+      author: 'Watchman Nee',
+      music: 'Chopin',
+      number: 504,
+    };
+
+    await songsDb.upsertSong(testSong);
+    await songsDb.upsertSong(song2);
+    await songsDb.upsertSong(song3);
+    await songsDb.upsertSong(song4);
+    await songsDb.upsertSong(song5);
+
+    const query1 = await songsDb.searchSongsByNumber('5', '');
+    assertJsonEquality(query1, [song4, testSong, song5, song2]);
+    const query2 = await songsDb.searchSongsByNumber('5', 'shl');
+    assertJsonEquality(query2, [song4, testSong, song2]);
+    const query3 = await songsDb.searchSongsByNumber('50', '');
+    assertJsonEquality(query3, [testSong, song5]);
+
+    // TODO: Test string matching on title/author/music/lyrics
   });
 });
 

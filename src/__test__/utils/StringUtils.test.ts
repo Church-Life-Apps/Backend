@@ -33,6 +33,6 @@ test('FormatForDbEntry function works', () => {
 
 test('FormatForDbSearchColumn function works', () => {
   expect(
-    formatForDbSearchColumn('@#FORmat[] for    search column..%%$()#{}"')
-  ).toBe('format for search column');
+    formatForDbSearchColumn('@#FORm\nat[] for    search c\n\nolumn..%%$()#{}"')
+  ).toBe('form at for search c olumn');
 });
