@@ -1,8 +1,15 @@
 import {isNumeric} from '../utils/StringUtils';
 import {ValidationError} from './ErrorHelpers';
 import {validate} from 'uuid';
-import {AcceptPendingSongRequest, RejectPendingSongRequest} from './ApiHelpers';
-import {Songbook, Song, Lyric, PendingSong} from '../models/ApiModels';
+import {
+  Songbook,
+  Song,
+  Lyric,
+  PendingSong,
+  AcceptPendingSongRequest,
+  RejectPendingSongRequest,
+  SearchRequest,
+} from '../models/ApiModels';
 
 /**
  * Validates the request of InsertSongbook API
@@ -42,11 +49,21 @@ export function validateRejectPendingSongRequest(
   validateString(request.rejectionReason, 'rejectionReason');
 }
 
+/**
+ * Validates the request of AcceptPendingSong API
+ */
 export function validateAcceptPendingSongRequest(
   request: AcceptPendingSongRequest
 ) {
   validatePendingSong(request.pendingSong, 'pendingSong.');
   validateString(request.acceptanceNote, 'acceptanceNote');
+}
+
+/**
+ * Validates the request of Search API
+ */
+export function validateSearchRequest(request: SearchRequest) {
+  validateString(request.searchText, 'searchText');
 }
 
 /**

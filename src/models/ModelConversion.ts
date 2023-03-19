@@ -1,6 +1,6 @@
-import {DbLyric, DbPendingSong} from '../db/DbModels';
+import {DbLyric, DbPendingSong, DbSong} from '../db/DbModels';
 import {formatForDbSearchColumn} from '../utils/StringUtils';
-import {Lyric, PendingSong} from './ApiModels';
+import {Lyric, PendingSong, Song, SongWithMatchedText} from './ApiModels';
 
 /**
  * Data model conversion helpers.
@@ -34,5 +34,15 @@ export function toDbPendingSong(pendingSong: PendingSong): DbPendingSong {
     requesterName: pendingSong.requesterName,
     requesterEmail: pendingSong.requesterEmail,
     requesterNote: pendingSong.requesterNote,
+  };
+}
+
+export function toSongWithMatchedText(
+  song: DbSong | Song,
+  matchText: string
+): SongWithMatchedText {
+  return {
+    song: song,
+    matchText: matchText,
   };
 }

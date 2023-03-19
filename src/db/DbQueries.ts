@@ -53,7 +53,7 @@ export function buildUpsertLyricQuery(
   lyricType: LyricType,
   verseNumber: number,
   lyrics: string,
-  searchLyrics: string,
+  searchLyrics: string
 ): string {
   return `
         INSERT INTO lyrics 
@@ -126,6 +126,31 @@ export function buildGetPendingSongByIdQuery(id: string): string {
 
 export function buildDeletePendingSongByIdQuery(id: string): string {
   return `DELETE FROM pending_songs WHERE id = '${id}' RETURNING *`;
+}
+
+export function buildSearchSongByNumberQuery(
+  songNumber: string,
+  songbook: string
+): string {
+  let songbookClause = '';
+  if (songbook != '') {
+    songbookClause = `AND songbook_id = '${songbook}'`;
+  }
+  return `SELECT * FROM songs 
+  WHERE CAST(number AS TEXT) LIKE '${songNumber}%' ${songbookClause} 
+  ORDER BY number ASC LIMIT 100`;
+}
+
+export function buildSearchSongByLyricsQuery(
+  searchText: string,
+  songbook: string
+): string {
+  // TODO: Search on title/author/music/lyrics
+  let songbookClause = '';
+  if (songbook != '') {
+    songbookClause = `AND s.songbook_id = '${songbook}'`;
+  }
+  return `SELECT * FROM songs WHERE title ilike '%${searchText}%' ${songbookClause}`
 }
 
 // One-time queries below this line! Should only be called by TEST cases :)

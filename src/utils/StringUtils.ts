@@ -23,7 +23,12 @@ export function removeDoubleSpaces(s: string): string {
   return s.replace(/\s{2,}/g, ' ');
 }
 
-export function toLowerCase() {}
+/**
+ * Removes New lines from a string.
+ */
+export function replaceNewLines(s: string): string {
+  return s.replace(/\n/g, ' ');
+}
 
 /**
  * Formats a string for entry into the Postgres DB.
@@ -40,7 +45,11 @@ export function formatForDbEntry(text: string): string {
  * 1. Removes all punctuation.
  * 2. Removes double spaces.
  * 3. Makes lower case.
+ * 4. Replaces new lines with spaces
+ * TODO: Remove Chords interwoven in the text
  */
 export function formatForDbSearchColumn(text: string): string {
-  return removeDoubleSpaces(removePunctuation(text)).toLowerCase();
+  return removeDoubleSpaces(
+    replaceNewLines(removePunctuation(text)).toLowerCase()
+  );
 }

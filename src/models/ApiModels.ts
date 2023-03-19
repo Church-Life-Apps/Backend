@@ -145,3 +145,52 @@ export function pendingSongToSong(pendingSong: PendingSong): Song {
     audioUrl: pendingSong.audioUrl ?? '',
   };
 }
+
+export interface RejectPendingSongRequest {
+  pendingSong: PendingSong;
+  rejectionReason: string;
+}
+
+export function toRejectPendingSongRequest(
+  data: any
+): RejectPendingSongRequest {
+  return {
+    pendingSong: toPendingSong(data.pendingSong),
+    rejectionReason: data.rejectionReason ?? '',
+  };
+}
+
+export interface AcceptPendingSongRequest {
+  pendingSong: PendingSong;
+  acceptanceNote: string;
+}
+
+export function toAcceptPendingSongRequest(
+  data: any
+): AcceptPendingSongRequest {
+  return {
+    pendingSong: toPendingSong(data.pendingSong),
+    acceptanceNote: data.acceptanceNote ?? '',
+  };
+}
+
+export interface SearchRequest {
+  searchText: string; // Search text filter (must not be empty)
+  songbook: string; // Optional songbook filter
+}
+
+export function toSearchRequest(data: any): SearchRequest {
+  return {
+    searchText: data.searchText ?? '',
+    songbook: data.songbook ?? '',
+  };
+}
+
+export interface SongWithMatchedText {
+  song: Song;
+  matchText: string;
+}
+
+export interface SearchResponse {
+  matchedSongs: SongWithMatchedText[];
+}

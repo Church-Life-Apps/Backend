@@ -11,15 +11,22 @@ import {
   validateInsertSongbookRequest,
   validateInsertSongRequest,
   validateRejectPendingSongRequest,
+  validateSearchRequest,
 } from './helpers/RequestValidationHelpers';
 import {SongsService} from './services/SongsService';
 import {Response} from 'express-serve-static-core';
 import {DatabaseError, ValidationError} from './helpers/ErrorHelpers';
+
 import {
+  SearchResponse,
   toAcceptPendingSongRequest,
+  toLyric,
+  toPendingSong,
   toRejectPendingSongRequest,
-} from './helpers/ApiHelpers';
-import {toLyric, toPendingSong, toSong, toSongbook} from './models/ApiModels';
+  toSearchRequest,
+  toSong,
+  toSongbook,
+} from './models/ApiModels';
 
 dotenv.config();
 
@@ -169,6 +176,28 @@ app.post('/api/acceptpendingsong', async (req, res) => {
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
+});
+
+app.get('/api/search', async (req, res) => {
+  try {
+    console.debug(`Search API Request received: ${req.url}`);
+    const request = toSearchRequest(req.query);
+    validateSearchRequest(request);
+    const matchedSongs = await songsService.searchSongs(
+      request.searchText,
+      request.songbook
+    );
+    const response: SearchResponse = {
+      matchedSongs: matchedSongs,
+    };
+    console.log(
+      `Returning ${matchedSongs.length} songs with search string: "${request.searchText}" and songbook: "${request.songbook}"`
+    );
+    res.send(response ?? {});
+  } catch (e: any) {
+    handleErrorsAndReturn(e, res);
+  }
+  // TODO: Write search API which takes in a search string, and maybe other filters, and returns a list of songs which matches.
 });
 
 app.get('*', function (_request, response) {

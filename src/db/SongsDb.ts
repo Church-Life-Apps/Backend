@@ -4,6 +4,7 @@
 
 import {Pool, PoolClient} from 'pg';
 import {DatabaseError} from '../helpers/ErrorHelpers';
+import {SongWithMatchedText} from '../models/ApiModels';
 import {formatForDbEntry} from '../utils/StringUtils';
 import {
   DbLyric,
@@ -24,6 +25,8 @@ import {
   QUERY_SELECT_FROM_PENDING_SONGS,
   QUERY_SELECT_FROM_SONGBOOKS,
   buildDeleteLyricsForSongQuery,
+  buildSearchSongByNumberQuery,
+  buildSearchSongByLyricsQuery,
 } from './DbQueries';
 require('dotenv').config();
 
@@ -165,7 +168,7 @@ export class SongsDb {
         lyric.verseNumber,
         formatForDbEntry(lyric.lyrics),
         formatForDbEntry(lyric.searchLyrics)
-        )
+      )
     ).then((rows) => {
       if (rows.length > 0) {
         return this.mapDbLyric(rows[0]);
@@ -298,6 +301,29 @@ export class SongsDb {
     }
   }
 
+  async searchSongsByNumber(
+    songNumber: string,
+    songbook: string
+  ): Promise<DbSong[]> {
+    const response = await this.queryDb(
+      buildSearchSongByNumberQuery(songNumber, songbook)
+    );
+    return response.map((row) => this.mapDbSong(row));
+  }
+
+  async searchSongsByText(
+    searchText: string,
+    songbook: string
+  ): Promise<DbSong[]> {
+    const response = await this.queryDb(
+      buildSearchSongByLyricsQuery(
+        formatForDbEntry(searchText),
+        formatForDbEntry(songbook)
+      )
+    );
+    return response.map((row) => this.mapDbSong(row));
+  }
+
   /**
    * Maps a database row to a DbSongbook object.
    */
@@ -420,6 +446,7 @@ export async function oneTimeSetUp(): Promise<void> {
     await queryDbVoid(QUERY_CREATE_SONGS_TABLE);
     await queryDbVoid(QUERY_CREATE_LYRIC_TYPE_ENUM);
     await queryDbVoid(QUERY_CREATE_LYRICS_TABLE);
+    await queryDbVoid(QUERY_CREATE_PENDING_SONGS_TABLE);
 }
 */
 }
