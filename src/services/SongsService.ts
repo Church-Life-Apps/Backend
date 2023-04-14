@@ -89,10 +89,7 @@ export class SongsService {
 
   async searchSongs(searchText: string, songbook: string): Promise<Song[]> {
     if (isNumeric(searchText)) {
-      return await this.songsDb.searchSongsByNumber(
-        searchText,
-        songbook
-      );
+      return await this.songsDb.searchSongsByNumber(searchText, songbook);
     } else {
       return await this.songsDb.searchSongsByText(searchText, songbook);
     }
