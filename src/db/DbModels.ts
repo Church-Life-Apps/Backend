@@ -37,8 +37,7 @@ export interface DbLyric {
   songId: string; // uuid
   lyricType: LyricType;
   verseNumber: number;
-  lyrics: string;
-  searchLyrics: string;
+  lyrics: string
 }
 
 // Data object for joined Songs table with Lyrics table

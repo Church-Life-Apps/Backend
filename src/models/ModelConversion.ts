@@ -1,6 +1,5 @@
-import {DbLyric, DbPendingSong, DbSong} from '../db/DbModels';
-import {formatForDbSearchColumn} from '../utils/StringUtils';
-import {Lyric, PendingSong, Song, SongWithMatchedText} from './ApiModels';
+import {DbLyric, DbPendingSong} from '../db/DbModels';
+import {Lyric, PendingSong} from './ApiModels';
 
 /**
  * Data model conversion helpers.
@@ -8,16 +7,6 @@ import {Lyric, PendingSong, Song, SongWithMatchedText} from './ApiModels';
  * Data types that have the same fields don't need an explicit function,
  * they can just be used interchangeably by typescript.
  */
-
-export function toDbLyric(lyric: Lyric): DbLyric {
-  return {
-    songId: lyric.songId,
-    lyricType: lyric.lyricType,
-    verseNumber: lyric.verseNumber,
-    lyrics: lyric.lyrics,
-    searchLyrics: formatForDbSearchColumn(lyric.lyrics),
-  };
-}
 
 export function toDbPendingSong(pendingSong: PendingSong): DbPendingSong {
   return {
@@ -30,19 +19,9 @@ export function toDbPendingSong(pendingSong: PendingSong): DbPendingSong {
     presentationOrder: pendingSong.presentationOrder,
     imageUrl: pendingSong.imageUrl,
     audioUrl: pendingSong.audioUrl,
-    lyrics: pendingSong.lyrics.map((lyric) => toDbLyric(lyric)),
+    lyrics: pendingSong.lyrics,
     requesterName: pendingSong.requesterName,
     requesterEmail: pendingSong.requesterEmail,
     requesterNote: pendingSong.requesterNote,
-  };
-}
-
-export function toSongWithMatchedText(
-  song: DbSong | Song,
-  matchText: string
-): SongWithMatchedText {
-  return {
-    song: song,
-    matchText: matchText,
   };
 }

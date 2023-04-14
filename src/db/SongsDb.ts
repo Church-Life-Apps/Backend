@@ -4,8 +4,7 @@
 
 import {Pool, PoolClient} from 'pg';
 import {DatabaseError} from '../helpers/ErrorHelpers';
-import {SongWithMatchedText} from '../models/ApiModels';
-import {formatForDbEntry} from '../utils/StringUtils';
+import {formatForDbEntry, formatForDbSearchColumn} from '../utils/StringUtils';
 import {
   DbLyric,
   DbPendingSong,
@@ -26,7 +25,7 @@ import {
   QUERY_SELECT_FROM_SONGBOOKS,
   buildDeleteLyricsForSongQuery,
   buildSearchSongByNumberQuery,
-  buildSearchSongByLyricsQuery,
+  buildSearchSongsByTextQuery,
 } from './DbQueries';
 require('dotenv').config();
 
@@ -167,7 +166,7 @@ export class SongsDb {
         lyric.lyricType,
         lyric.verseNumber,
         formatForDbEntry(lyric.lyrics),
-        formatForDbEntry(lyric.searchLyrics)
+        formatForDbEntry(formatForDbSearchColumn(lyric.lyrics))
       )
     ).then((rows) => {
       if (rows.length > 0) {
@@ -284,7 +283,7 @@ export class SongsDb {
             lyric.lyricType,
             lyric.verseNumber,
             formatForDbEntry(lyric.lyrics),
-            formatForDbEntry(lyric.searchLyrics)
+            formatForDbEntry(formatForDbSearchColumn(lyric.lyrics))
           ),
           client
         );
@@ -316,12 +315,20 @@ export class SongsDb {
     songbook: string
   ): Promise<DbSong[]> {
     const response = await this.queryDb(
-      buildSearchSongByLyricsQuery(
+      buildSearchSongsByTextQuery(
         formatForDbEntry(searchText),
         formatForDbEntry(songbook)
       )
     );
-    return response.map((row) => this.mapDbSong(row));
+    const songs = response.map((row) => this.mapDbSong(row));
+
+    // response may contain duplicate songs (sql query limitation), so remove duplicates.
+    const uniqueMap = new Map<string, DbSong>();
+    songs.forEach((s) => {
+      uniqueMap.set(s.id, s);
+    });
+
+    return Array.from(uniqueMap.values());
   }
 
   /**
@@ -363,7 +370,6 @@ export class SongsDb {
       lyricType: row.lyric_type ?? '',
       verseNumber: row.verse_number ?? '',
       lyrics: row.lyrics ?? '',
-      searchLyrics: row.search_lyrics ?? '',
     };
   }
 

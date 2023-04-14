@@ -1,4 +1,3 @@
-import {DbSong} from '../db/DbModels';
 import {SongsDb} from '../db/SongsDb';
 import {
   Lyric,
@@ -6,13 +5,8 @@ import {
   Song,
   Songbook,
   SongWithLyrics,
-  SongWithMatchedText,
 } from '../models/ApiModels';
-import {
-  toSongWithMatchedText,
-  toDbLyric,
-  toDbPendingSong,
-} from '../models/ModelConversion';
+import {toDbPendingSong} from '../models/ModelConversion';
 import {isNumeric} from '../utils/StringUtils';
 
 export class SongsService {
@@ -32,7 +26,7 @@ export class SongsService {
   }
 
   async insertLyricMethod(lyric: Lyric): Promise<Lyric> {
-    return await this.songsDb.upsertLyric(toDbLyric(lyric));
+    return await this.songsDb.upsertLyric(lyric);
   }
 
   async insertPendingSongMethod(
@@ -93,19 +87,14 @@ export class SongsService {
     return await this.songsDb.queryPendingSongs();
   }
 
-  async searchSongs(
-    searchText: string,
-    songbook: string
-  ): Promise<SongWithMatchedText[]> {
-    let x: DbSong[];
+  async searchSongs(searchText: string, songbook: string): Promise<Song[]> {
     if (isNumeric(searchText)) {
-      x = await this.songsDb.searchSongsByNumber(searchText, songbook);
+      return await this.songsDb.searchSongsByNumber(
+        searchText,
+        songbook
+      );
     } else {
-      x = await this.songsDb.searchSongsByText(searchText, songbook);
+      return await this.songsDb.searchSongsByText(searchText, songbook);
     }
-    return x.map((song) => ({
-      song: song,
-      matchText: '',
-    }));
   }
 }

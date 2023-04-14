@@ -53,3 +53,14 @@ export function formatForDbSearchColumn(text: string): string {
     replaceNewLines(removePunctuation(text)).toLowerCase()
   );
 }
+
+/**
+ * Formats a string for postgres DB ts query.
+ *
+ * Replaces all spaces with an &.
+ */
+export function formatForPostgresTsQuery(text: string): string {
+  return removeDoubleSpaces(
+    removePunctuation(text).trim().toLowerCase()
+  ).replace(/ /g, '&');
+}
