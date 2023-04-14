@@ -53,7 +53,7 @@ async function initializeDatabase() {
   await testPool.query(QUERY_CREATE_LYRIC_TYPE_ENUM);
   await testPool.query(QUERY_CREATE_LYRICS_TABLE);
   await testPool.query(QUERY_CREATE_PENDING_SONGS_TABLE);
-  await testPool.query(QUERY_CREATE_INDEXES)
+  await testPool.query(QUERY_CREATE_INDEXES);
 }
 
 async function resetDatabase() {
@@ -344,7 +344,7 @@ describe('Test Database Tables', () => {
       ...testSong,
       id: uuidv4(),
       songbookId: 'new',
-      title: 'New Songbook Song',
+      title: 'New Spirit Songbook Song',
       author: 'Watchman Nee',
       music: 'Chopin',
       number: 504,
@@ -356,6 +356,37 @@ describe('Test Database Tables', () => {
     await songsDb.upsertSong(song4);
     await songsDb.upsertSong(song5);
 
+    const lyric1: DbLyric = {
+      songId: testSong.id,
+      lyricType: LyricType.LYRIC_TYPE_VERSE,
+      verseNumber: 1,
+      lyrics: `Loved with everlasting love,\nLed by grace that love to know;\nGracious Spirit from above\nThou hast taught me it is so.`,
+    };
+    const lyric2: DbLyric = {
+      songId: song2.id,
+      lyricType: LyricType.LYRIC_TYPE_VERSE,
+      verseNumber: 1,
+      lyrics: `O God and Father, we our praises bring,\nFor who more worthy of our praise could be\nThan Thou, who seekest worshipers who sing\nIn spirit and in truth adoringly!`,
+    };
+    const lyric3: DbLyric = {
+      songId: song3.id,
+      lyricType: LyricType.LYRIC_TYPE_VERSE,
+      verseNumber: 1,
+      lyrics: `King of my life, I crown Thee now,\nThine shall the glory be;\nLest I forget Thy thorn-crowned brow,\nLead me to Calvary.`,
+    };
+    const lyric4: DbLyric = {
+      songId: song4.id,
+      lyricType: LyricType.LYRIC_TYPE_VERSE,
+      verseNumber: 1,
+      lyrics: `Abide with me! Fast falls the eventide;\nThe darkness deepens; Lord, with me abide!\nWhen other helpers fail, and comforts flee,\nHelp of the helpless, O, abide with me!`,
+    };
+
+    await songsDb.upsertLyric(lyric1);
+    await songsDb.upsertLyric(lyric2);
+    await songsDb.upsertLyric(lyric3);
+    await songsDb.upsertLyric(lyric4);
+
+    // Search by Numbers
     const query1 = await songsDb.searchSongsByNumber('5', '');
     assertJsonEquality(query1, [song4, testSong, song5, song2]);
     const query2 = await songsDb.searchSongsByNumber('5', 'shl');
@@ -363,7 +394,20 @@ describe('Test Database Tables', () => {
     const query3 = await songsDb.searchSongsByNumber('50', '');
     assertJsonEquality(query3, [testSong, song5]);
 
-    // TODO: Test string matching on title/author/lyrics
+    // Search by Text
+    // Able to handle minor typos, and some cool english things, like matching 'abiding' to 'abide'
+    const query4 = await songsDb.searchSongsByText('life out of deth', '');
+    assertJsonEquality(query4, [song2]);
+    const query5 = await songsDb.searchSongsByText('watcman nee', '');
+    assertJsonEquality(query5, [song4, song5, song2]);
+    const query6 = await songsDb.searchSongsByText('spirit', '');
+    assertJsonEquality(query6, [song5, testSong, song2]);
+    const query7 = await songsDb.searchSongsByText('abiding', '');
+    assertJsonEquality(query7, [song3, song4]);
+    const query8 = await songsDb.searchSongsByText('abiding and confiding', '');
+    assertJsonEquality(query8, [song3]);
+    const query9 = await songsDb.searchSongsByText('spirit', 'shl');
+    assertJsonEquality(query9, [testSong, song2]);
   });
 });
 

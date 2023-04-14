@@ -40,5 +40,7 @@ test('FormatForDbSearchColumn function works', () => {
 
 test('FormatForPostgresTsQuery function works', () => {
   expect(formatForPostgresTsQuery('  ')).toBe('');
-  expect(formatForPostgresTsQuery('    SOMETHING    and another)#@(  ')).toBe('something&and&another');
+  expect(formatForPostgresTsQuery('    SOMETHING    and another)#@(  ')).toBe(
+    'something&and&another'
+  );
 });
