@@ -1,6 +1,7 @@
 import {
   formatForDbEntry,
   formatForDbSearchColumn,
+  formatForPostgresTsQuery,
   isNumeric,
   removeDoubleSpaces,
   removePunctuation,
@@ -35,4 +36,9 @@ test('FormatForDbSearchColumn function works', () => {
   expect(
     formatForDbSearchColumn('@#FORm\nat[] for    search c\n\nolumn..%%$()#{}"')
   ).toBe('form at for search c olumn');
+});
+
+test('FormatForPostgresTsQuery function works', () => {
+  expect(formatForPostgresTsQuery('  ')).toBe('');
+  expect(formatForPostgresTsQuery('    SOMETHING    and another)#@(  ')).toBe('something&and&another');
 });

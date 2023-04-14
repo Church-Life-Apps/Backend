@@ -8,15 +8,16 @@ import {
   LyricType,
 } from '../../db/DbModels';
 import {
+  QUERY_CREATE_INDEXES,
   QUERY_CREATE_LYRICS_TABLE,
   QUERY_CREATE_LYRIC_TYPE_ENUM,
   QUERY_CREATE_PENDING_SONGS_TABLE,
   QUERY_CREATE_SONGBOOKS_TABLE,
   QUERY_CREATE_SONGS_TABLE,
+  QUERY_DROP_INDEXES,
 } from '../../db/DbQueries';
 import {SongsDb} from '../../db/SongsDb';
 import {v4 as uuidv4} from 'uuid';
-import {formatForDbSearchColumn} from '../../utils/StringUtils';
 import {Song} from '../../models/ApiModels';
 
 require('dotenv').config();
@@ -41,6 +42,7 @@ async function nukeDatabase() {
   await testPool.query('DROP TABLE IF EXISTS pending_songs CASCADE');
   await testPool.query('DROP TABLE IF EXISTS lyrics CASCADE');
   await testPool.query('DROP TYPE IF EXISTS lyric_type');
+  await testPool.query(QUERY_DROP_INDEXES);
 }
 
 async function initializeDatabase() {
@@ -51,6 +53,7 @@ async function initializeDatabase() {
   await testPool.query(QUERY_CREATE_LYRIC_TYPE_ENUM);
   await testPool.query(QUERY_CREATE_LYRICS_TABLE);
   await testPool.query(QUERY_CREATE_PENDING_SONGS_TABLE);
+  await testPool.query(QUERY_CREATE_INDEXES)
 }
 
 async function resetDatabase() {
@@ -116,21 +119,18 @@ const testLyrics: DbLyric[] = [
     lyricType: LyricType.LYRIC_TYPE_VERSE,
     verseNumber: 1,
     lyrics: verse1,
-    searchLyrics: formatForDbSearchColumn(verse1),
   },
   {
     songId: songId,
     lyricType: LyricType.LYRIC_TYPE_VERSE,
     verseNumber: 2,
     lyrics: verse2,
-    searchLyrics: formatForDbSearchColumn(verse2),
   },
   {
     songId: songId,
     lyricType: LyricType.LYRIC_TYPE_CHORUS,
     verseNumber: 1,
     lyrics: chorus,
-    searchLyrics: formatForDbSearchColumn(chorus),
   },
 ];
 
@@ -363,7 +363,7 @@ describe('Test Database Tables', () => {
     const query3 = await songsDb.searchSongsByNumber('50', '');
     assertJsonEquality(query3, [testSong, song5]);
 
-    // TODO: Test string matching on title/author/music/lyrics
+    // TODO: Test string matching on title/author/lyrics
   });
 });
 

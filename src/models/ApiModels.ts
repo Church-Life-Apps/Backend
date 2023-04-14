@@ -186,11 +186,6 @@ export function toSearchRequest(data: any): SearchRequest {
   };
 }
 
-export interface SongWithMatchedText {
-  song: Song;
-  matchText: string;
-}
-
 export interface SearchResponse {
-  matchedSongs: SongWithMatchedText[];
+  matchedSongs: Song[];
 }

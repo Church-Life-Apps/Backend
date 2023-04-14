@@ -2,7 +2,7 @@
  * Strings and functions for DB Queries
  */
 
-import {formatForDbEntry} from '../utils/StringUtils';
+import {formatForDbEntry, formatForPostgresTsQuery} from '../utils/StringUtils';
 import {DbLyric, LyricType} from './DbModels';
 
 // Normal Queries
@@ -58,9 +58,9 @@ export function buildUpsertLyricQuery(
   return `
         INSERT INTO lyrics 
         (song_id, lyric_type, verse_number, lyrics, search_lyrics, inserted_dt, updated_dt)
-        VALUES ('${songId}', '${lyricType}', ${verseNumber}, '${lyrics}', '${searchLyrics}', now(), now())
+        VALUES ('${songId}', '${lyricType}', ${verseNumber}, '${lyrics}', to_tsvector('english', '${searchLyrics}'), now(), now())
         ON CONFLICT (song_id, lyric_type, verse_number) DO UPDATE SET
-        lyrics = '${lyrics}', search_lyrics='${searchLyrics}', updated_dt = now()
+        lyrics = '${lyrics}', search_lyrics = to_tsvector('english', '${searchLyrics}'), updated_dt = now()
         WHERE lyrics.song_id = '${songId}' AND lyrics.lyric_type = '${lyricType}' AND lyrics.verse_number = ${verseNumber}
         RETURNING *
     `.trim();
@@ -141,18 +141,50 @@ export function buildSearchSongByNumberQuery(
   ORDER BY number ASC LIMIT 100`;
 }
 
-export function buildSearchSongByLyricsQuery(
+/**
+ * 1. Find matches to the title and author columns. Order by title similarity, or number.
+ * 2. Find matches to lyrics which match the searchText (requires trust in tsvector and ts_query)
+ * 3. Put them together and return up to 50 (non-unique) rows. Upper logic will need to make sure each row is unique.
+ */
+export function buildSearchSongsByTextQuery(
   searchText: string,
   songbook: string
 ): string {
-  // TODO: Search on title/author/music/lyrics
   let songbookClause = '';
   if (songbook != '') {
     songbookClause = `AND s.songbook_id = '${songbook}'`;
   }
-  return `SELECT * FROM songs WHERE title ilike '%${searchText}%' ${songbookClause}`
+  const lyricSearchText = formatForPostgresTsQuery(searchText);
+  return `
+  WITH songs_table_query AS (
+    SELECT *
+    FROM songs s
+    WHERE (title ILIKE '%${searchText}%' OR title % '${searchText}' 
+    OR author ILIKE '%${searchText}%' OR author % '${searchText}')
+    ${songbookClause}
+    ORDER BY CASE
+      WHEN title ILIKE '%${searchText}%' OR title % '${searchText}' 
+      THEN similarity(title, '${searchText}') ELSE NULL
+      END DESC, 
+    number ASC
+  ),
+  lyrics_table_query AS (
+    SELECT s.* FROM songs s LEFT JOIN lyrics l ON s.id = l.song_id
+    WHERE l.search_lyrics @@ to_tsquery('english', '${lyricSearchText}')
+    ${songbookClause}
+    ORDER BY ts_rank(l.search_lyrics, to_tsquery('english', '${lyricSearchText}')) desc
+  )
+  SELECT *
+  FROM (
+    SELECT *
+    FROM songs_table_query
+    UNION ALL
+    SELECT *
+    FROM lyrics_table_query
+  ) AS combined_query
+    LIMIT 50;
+   `.trim();
 }
-
 // One-time queries below this line! Should only be called by TEST cases :)
 export const QUERY_CREATE_SONGBOOKS_TABLE = `
     CREATE TABLE IF NOT EXISTS songbooks (
@@ -198,7 +230,7 @@ export const QUERY_CREATE_LYRICS_TABLE = `
         lyric_type lyric_type NOT NULL,
         verse_number integer NOT NULL,
         lyrics text NOT NULL,
-        search_lyrics text NOT NULL,
+        search_lyrics tsvector NOT NULL,
         inserted_dt timestamptz NOT NULL,
         updated_dt timestamptz NOT NULL,
         PRIMARY KEY (song_id, lyric_type, verse_number)
@@ -224,3 +256,15 @@ export const QUERY_CREATE_PENDING_SONGS_TABLE = `
         updated_dt timestamptz NOT NULL
     );
 `.trim();
+
+export const QUERY_CREATE_INDEXES = `
+  CREATE INDEX IF NOT EXISTS idx_search_lyrics_gin ON lyrics USING GIN(search_lyrics);
+  CREATE INDEX IF NOT EXISTS idx_songs_title_trgm ON songs USING gin (title gin_trgm_ops);
+  CREATE INDEX IF NOT EXISTS idx_songs_author_trgm ON songs USING gin (author gin_trgm_ops);
+`;
+
+export const QUERY_DROP_INDEXES = `
+  DROP INDEX IF EXISTS idx_search_lyrics_gin;
+  DROP INDEX IF EXISTS idx_songs_title_trgm;
+  DROP INDEX IF EXISTS idx_songs_author_trgm;
+`;
