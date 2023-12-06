@@ -2,8 +2,11 @@
  * Strings and functions for DB Queries
  */
 
-import {formatForDbEntry, formatForPostgresTsQuery} from '../utils/StringUtils';
-import {DbLyric, LyricType} from './DbModels';
+import {
+  formatForDbEntry,
+  formatForPostgresTsQuery,
+} from "../utils/StringUtils";
+import { DbLyric, LyricType } from "./DbModels";
 
 // Normal Queries
 export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`;
@@ -118,7 +121,7 @@ export function buildInsertPendingSongQuery(
 }
 
 export const QUERY_SELECT_FROM_PENDING_SONGS =
-  'SELECT * FROM pending_songs ORDER BY songbook_id ASC, number ASC';
+  "SELECT * FROM pending_songs ORDER BY songbook_id ASC, number ASC";
 
 export function buildGetPendingSongByIdQuery(id: string): string {
   return `SELECT * FROM pending_songs WHERE id = '${id}'`;
@@ -132,8 +135,8 @@ export function buildSearchSongByNumberQuery(
   songNumber: string,
   songbook: string
 ): string {
-  let songbookClause = '';
-  if (songbook != '') {
+  let songbookClause = "";
+  if (songbook != "") {
     songbookClause = `AND songbook_id = '${songbook}'`;
   }
   return `SELECT * FROM songs 
@@ -150,8 +153,8 @@ export function buildSearchSongsByTextQuery(
   searchText: string,
   songbook: string
 ): string {
-  let songbookClause = '';
-  if (songbook != '') {
+  let songbookClause = "";
+  if (songbook != "") {
     songbookClause = `AND s.songbook_id = '${songbook}'`;
   }
   const lyricSearchText = formatForPostgresTsQuery(searchText);

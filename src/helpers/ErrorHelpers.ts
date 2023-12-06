@@ -1,9 +1,4 @@
-/**
- * For Request Validation Errors
- */
-export class ValidationError extends Error {}
+import DatabaseError from "../errors/DatabaseError";
+import ValidationError from "../errors/ValidationError";
 
-/**
- * For Database Query Errors
- */
-export class DatabaseError extends Error {}
+export { DatabaseError, ValidationError };

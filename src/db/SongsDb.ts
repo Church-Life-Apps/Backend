@@ -2,16 +2,19 @@
  * Database Layer Code
  */
 
-import {Pool, PoolClient} from 'pg';
-import {DatabaseError} from '../helpers/ErrorHelpers';
-import {formatForDbEntry, formatForDbSearchColumn} from '../utils/StringUtils';
+import { Pool, PoolClient } from "pg";
+import { DatabaseError } from "../helpers/ErrorHelpers";
+import {
+  formatForDbEntry,
+  formatForDbSearchColumn,
+} from "../utils/StringUtils";
 import {
   DbLyric,
   DbPendingSong,
   DbSong,
   DbSongbook,
   DbSongWithLyrics,
-} from './DbModels';
+} from "./DbModels";
 import {
   buildDeletePendingSongByIdQuery,
   buildGetPendingSongByIdQuery,
@@ -26,8 +29,9 @@ import {
   buildDeleteLyricsForSongQuery,
   buildSearchSongByNumberQuery,
   buildSearchSongsByTextQuery,
-} from './DbQueries';
-require('dotenv').config();
+} from "./DbQueries";
+
+require("dotenv").config();
 
 // Setup
 const defaultPool = new Pool({
@@ -56,19 +60,17 @@ export class SongsDb {
    * Queries all rows from songbooks table
    */
   async querySongbooks(): Promise<DbSongbook[]> {
-    return await this.queryDb(QUERY_SELECT_FROM_SONGBOOKS).then((rows) => {
-      return rows.map((row) => this.mapDbSongbook(row));
-    });
+    return this.queryDb(QUERY_SELECT_FROM_SONGBOOKS).then((rows) =>
+      rows.map((row) => this.mapDbSongbook(row))
+    );
   }
 
   /**
    * Lists all songs for a songbook
    */
   async querySongsForSongbook(songbookId: string): Promise<DbSong[]> {
-    return await this.queryDb(buildGetSongsForSongbookQuery(songbookId)).then(
-      (rows) => {
-        return rows.map((row) => this.mapDbSong(row));
-      }
+    return this.queryDb(buildGetSongsForSongbookQuery(songbookId)).then(
+      (rows) => rows.map((row) => this.mapDbSong(row))
     );
   }
 
@@ -79,30 +81,32 @@ export class SongsDb {
     songbookId: string,
     number: number
   ): Promise<DbSongWithLyrics> {
-    return await this.queryDb(
-      buildGetSongWithLyricsQuery(songbookId, number)
-    ).then((rows) => {
-      if (rows.length <= 0) {
-        throw new DatabaseError(`Song not found for ${songbookId}: ${number}`);
+    return this.queryDb(buildGetSongWithLyricsQuery(songbookId, number)).then(
+      (rows) => {
+        if (rows.length <= 0) {
+          throw new DatabaseError(
+            `Song not found for ${songbookId}: ${number}`
+          );
+        }
+        return this.mapDbSongWithLyric(rows);
       }
-      return this.mapDbSongWithLyric(rows);
-    });
+    );
   }
 
   /**
    * Queries all rows from pending_songs table
    */
   async queryPendingSongs(): Promise<DbPendingSong[]> {
-    return await this.queryDb(QUERY_SELECT_FROM_PENDING_SONGS).then((rows) => {
-      return rows.map((row) => this.mapDbPendingSong(row));
-    });
+    return this.queryDb(QUERY_SELECT_FROM_PENDING_SONGS).then((rows) =>
+      rows.map((row) => this.mapDbPendingSong(row))
+    );
   }
 
   /**
    * Gets row from pending_songs table by id
    */
   async getPendingSongById(id: string): Promise<DbPendingSong> {
-    return await this.queryDb(buildGetPendingSongByIdQuery(id)).then((rows) => {
+    return this.queryDb(buildGetPendingSongByIdQuery(id)).then((rows) => {
       if (rows.length <= 0) {
         throw new DatabaseError(`No Pending Song found for id: ${id}`);
       }
@@ -114,7 +118,7 @@ export class SongsDb {
    * Inserts a DbSongbook into the songbooks table
    */
   async insertSongbook(songbook: DbSongbook): Promise<DbSongbook> {
-    return await this.queryDb(
+    return this.queryDb(
       buildInsertSongbookQuery(
         songbook.id,
         songbook.fullName,
@@ -125,9 +129,8 @@ export class SongsDb {
     ).then((rows) => {
       if (rows.length > 0) {
         return rows.map((row) => this.mapDbSongbook(row))[0];
-      } else {
-        throw new DatabaseError('Unable to insert Songbook');
       }
+      throw new DatabaseError("Unable to insert Songbook");
     });
   }
 
@@ -135,7 +138,7 @@ export class SongsDb {
    * Inserts or Updates a DbSong into the songs table
    */
   async upsertSong(song: DbSong): Promise<DbSong> {
-    return await this.queryDb(
+    return this.queryDb(
       buildUpsertSongQuery(
         song.id,
         song.songbookId,
@@ -150,9 +153,8 @@ export class SongsDb {
     ).then((rows) => {
       if (rows.length > 0) {
         return this.mapDbSong(rows[0]);
-      } else {
-        throw new DatabaseError('Unable to insert song.');
       }
+      throw new DatabaseError("Unable to insert song.");
     });
   }
 
@@ -160,7 +162,7 @@ export class SongsDb {
    * Inserts or updates a DbLyric into the lyrics table
    */
   async upsertLyric(lyric: DbLyric): Promise<DbLyric> {
-    return await this.queryDb(
+    return this.queryDb(
       buildUpsertLyricQuery(
         lyric.songId,
         lyric.lyricType,
@@ -171,9 +173,8 @@ export class SongsDb {
     ).then((rows) => {
       if (rows.length > 0) {
         return this.mapDbLyric(rows[0]);
-      } else {
-        throw new DatabaseError('Unable to insert lyric');
       }
+      throw new DatabaseError("Unable to insert lyric");
     });
   }
 
@@ -181,7 +182,7 @@ export class SongsDb {
    * Inserts a DbPendingSong into the pending_songs table
    */
   async insertPendingSong(pendingSong: DbPendingSong): Promise<DbPendingSong> {
-    return await this.queryDb(
+    return this.queryDb(
       buildInsertPendingSongQuery(
         pendingSong.id,
         pendingSong.songbookId,
@@ -200,9 +201,8 @@ export class SongsDb {
     ).then((rows) => {
       if (rows.length > 0) {
         return this.mapDbPendingSong(rows[0]);
-      } else {
-        throw new DatabaseError('Unable to insert pending song.');
       }
+      throw new DatabaseError("Unable to insert pending song.");
     });
   }
 
@@ -210,15 +210,12 @@ export class SongsDb {
    * Deletes a DbPendingSong row based on id
    */
   async deletePendingSong(id: string): Promise<DbPendingSong | null> {
-    return await this.queryDb(buildDeletePendingSongByIdQuery(id)).then(
-      (rows) => {
-        if (rows.length > 0) {
-          return this.mapDbPendingSong(rows[0]);
-        } else {
-          return null;
-        }
+    return this.queryDb(buildDeletePendingSongByIdQuery(id)).then((rows) => {
+      if (rows.length > 0) {
+        return this.mapDbPendingSong(rows[0]);
       }
-    );
+      return null;
+    });
   }
 
   /**
@@ -236,7 +233,7 @@ export class SongsDb {
     const client: PoolClient = await this.pool.connect();
     try {
       // Start Transaction
-      await this.queryWithLog('BEGIN', client);
+      await this.queryWithLog("BEGIN", client);
       // Delete Pending Song - If it's empty then throw due to no prior pending song.
       await this.queryWithLog(
         buildDeletePendingSongByIdQuery(pendingSong.id),
@@ -290,10 +287,10 @@ export class SongsDb {
       });
 
       // If all went well, then commit the transaction.
-      await this.queryWithLog('COMMIT', client);
+      await this.queryWithLog("COMMIT", client);
     } catch (e: any) {
       // If there was an error along the way then roll the whole transaction back.
-      await this.queryWithLog('ROLLBACK', client);
+      await this.queryWithLog("ROLLBACK", client);
       throw e;
     } finally {
       client.release();
@@ -336,10 +333,10 @@ export class SongsDb {
    */
   private mapDbSongbook(row: any): DbSongbook {
     return {
-      id: row.id ?? '',
-      fullName: row.full_name ?? '',
-      staticMetadataLink: row.static_metadata_link ?? '',
-      imageUrl: row.image_url ?? '',
+      id: row.id ?? "",
+      fullName: row.full_name ?? "",
+      staticMetadataLink: row.static_metadata_link ?? "",
+      imageUrl: row.image_url ?? "",
       openToNewSongs: row.open_to_new_songs ?? false,
     };
   }
@@ -349,15 +346,15 @@ export class SongsDb {
    */
   private mapDbSong(row: any): DbSong {
     return {
-      id: row.id ?? '',
-      songbookId: row.songbook_id ?? '',
+      id: row.id ?? "",
+      songbookId: row.songbook_id ?? "",
       number: row.number ?? 0,
-      title: row.title ?? '',
-      author: row.author ?? '',
-      music: row.music ?? '',
-      presentationOrder: row.presentation_order ?? '',
-      imageUrl: row.image_url ?? '',
-      audioUrl: row.audio_url ?? '',
+      title: row.title ?? "",
+      author: row.author ?? "",
+      music: row.music ?? "",
+      presentationOrder: row.presentation_order ?? "",
+      imageUrl: row.image_url ?? "",
+      audioUrl: row.audio_url ?? "",
     };
   }
 
@@ -366,10 +363,10 @@ export class SongsDb {
    */
   private mapDbLyric(row: any): DbLyric {
     return {
-      songId: row.song_id ?? '',
-      lyricType: row.lyric_type ?? '',
-      verseNumber: row.verse_number ?? '',
-      lyrics: row.lyrics ?? '',
+      songId: row.song_id ?? "",
+      lyricType: row.lyric_type ?? "",
+      verseNumber: row.verse_number ?? "",
+      lyrics: row.lyrics ?? "",
     };
   }
 
@@ -378,19 +375,19 @@ export class SongsDb {
    */
   private mapDbPendingSong(row: any): DbPendingSong {
     return {
-      id: row.id ?? '',
-      songbookId: row.songbook_id ?? '',
+      id: row.id ?? "",
+      songbookId: row.songbook_id ?? "",
       number: row.number ?? 0,
-      title: row.title ?? '',
-      author: row.author ?? '',
-      music: row.music ?? '',
-      presentationOrder: row.presentation_order ?? '',
-      imageUrl: row.image_url ?? '',
-      audioUrl: row.audio_url ?? '',
-      lyrics: JSON.parse(row.lyrics ?? '[]'),
-      requesterName: row.requester_name ?? '',
-      requesterEmail: row.requester_email ?? '',
-      requesterNote: row.requester_note ?? '',
+      title: row.title ?? "",
+      author: row.author ?? "",
+      music: row.music ?? "",
+      presentationOrder: row.presentation_order ?? "",
+      imageUrl: row.image_url ?? "",
+      audioUrl: row.audio_url ?? "",
+      lyrics: JSON.parse(row.lyrics ?? "[]"),
+      requesterName: row.requester_name ?? "",
+      requesterEmail: row.requester_email ?? "",
+      requesterNote: row.requester_note ?? "",
     };
   }
 
@@ -402,9 +399,7 @@ export class SongsDb {
     return {
       song: this.mapDbSong(rows[0]),
       lyrics: rows
-        .filter((row: any) => {
-          return this.mapDbLyric(row).lyrics.length > 0;
-        })
+        .filter((row: any) => this.mapDbLyric(row).lyrics.length > 0)
         .map((row: any) => this.mapDbLyric(row)),
     };
   }
@@ -443,7 +438,7 @@ export class SongsDb {
 
   private async queryWithLog(query: string, client: PoolClient) {
     console.log(`Database Query: "${query}".`);
-    return await client.query(query);
+    return client.query(query);
   }
 
   /** One time set up function. Never needs to be called again unless our DB gets nuked.

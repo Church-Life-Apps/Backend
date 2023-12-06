@@ -13,21 +13,21 @@ export function isNumeric(word: string): boolean {
  * Removes special characters from the string.
  */
 export function removePunctuation(s: string): string {
-  return s.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g, '');
+  return s.replace(/[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g, "");
 }
 
 /**
  * Replaces occurences of 2 or more spaces with a single space.
  */
 export function removeDoubleSpaces(s: string): string {
-  return s.replace(/\s{2,}/g, ' ');
+  return s.replace(/\s{2,}/g, " ");
 }
 
 /**
  * Removes New lines from a string.
  */
 export function replaceNewLines(s: string): string {
-  return s.replace(/\n/g, ' ');
+  return s.replace(/\n/g, " ");
 }
 
 /**
@@ -62,5 +62,5 @@ export function formatForDbSearchColumn(text: string): string {
 export function formatForPostgresTsQuery(text: string): string {
   return removeDoubleSpaces(
     removePunctuation(text).trim().toLowerCase()
-  ).replace(/ /g, '&');
+  ).replace(/ /g, "&");
 }

@@ -1,6 +1,6 @@
-import {isNumeric} from '../utils/StringUtils';
-import {ValidationError} from './ErrorHelpers';
-import {validate} from 'uuid';
+import { validate } from "uuid";
+import { isNumeric } from "../utils/StringUtils";
+import { ValidationError } from "./ErrorHelpers";
 import {
   Songbook,
   Song,
@@ -9,76 +9,15 @@ import {
   AcceptPendingSongRequest,
   RejectPendingSongRequest,
   SearchRequest,
-} from '../models/ApiModels';
+} from "../models/ApiModels";
 
 /**
- * Validates the request of InsertSongbook API
+ * Validates a string.
  */
-export function validateInsertSongbookRequest(songbook: Songbook) {
-  validateSongbook(songbook, '');
-}
-
-/**
- * Validates the request of InsertSong API
- */
-export function validateInsertSongRequest(song: Song) {
-  validateSong(song, '');
-}
-
-/**
- * Validates the request of InsertLyric API
- */
-export function validateInsertLyricRequest(lyric: Lyric) {
-  validateLyric(lyric, '');
-}
-
-/**
- * Validates the request of InsertPendingSongAPI
- */
-export function validateInsertPendingSongRequest(pendingSong: PendingSong) {
-  validatePendingSong(pendingSong, '');
-}
-
-/**
- * Validates the request of RejectPendingSong API
- */
-export function validateRejectPendingSongRequest(
-  request: RejectPendingSongRequest
-) {
-  validateUuid(request.pendingSong.id, 'id');
-  validateString(request.rejectionReason, 'rejectionReason');
-}
-
-/**
- * Validates the request of AcceptPendingSong API
- */
-export function validateAcceptPendingSongRequest(
-  request: AcceptPendingSongRequest
-) {
-  validatePendingSong(request.pendingSong, 'pendingSong.');
-  validateString(request.acceptanceNote, 'acceptanceNote');
-}
-
-/**
- * Validates the request of Search API
- */
-export function validateSearchRequest(request: SearchRequest) {
-  validateString(request.searchText, 'searchText');
-}
-
-/**
- * Validates the request of GetSongs API
- */
-export function validateGetSongsRequest(songbookId: string) {
-  validateString(songbookId, 'songbookId');
-}
-
-/**
- * Validates the request of a GetSong API
- */
-export function validateGetSongRequest(songbookId: string, number: string) {
-  validateString(songbookId, 'songbookId');
-  validateStringIntegerGreaterThanZero(number, 'number');
+function validateString(data: string, fieldName: string) {
+  if (data.trim().length <= 0) {
+    throw new ValidationError(`${fieldName} is required.`);
+  }
 }
 
 /**
@@ -87,6 +26,24 @@ export function validateGetSongRequest(songbookId: string, number: string) {
 function validateSongbook(songbook: Songbook, prefix: string) {
   validateString(songbook.id, `${prefix}id`);
   validateString(songbook.fullName, `${prefix}fullName`);
+}
+
+/**
+ * Validates a string is a valid uuid.
+ */
+function validateUuid(data: string, fieldName: String) {
+  if (!validate(data) || data === "00000000-0000-0000-0000-000000000000") {
+    throw new ValidationError(`${fieldName} is not a valid UUID.`);
+  }
+}
+
+/**
+ * Validates a string is a number greater than 0.
+ */
+function validateIntegerGreaterThanZero(data: number, fieldName: string) {
+  if (data <= 0) {
+    throw new ValidationError(`${fieldName} must be greater than 0.`);
+  }
 }
 
 /**
@@ -125,39 +82,82 @@ function validatePendingSong(pendingSong: PendingSong, prefix: string) {
 }
 
 /**
- * Validates a string.
- */
-function validateString(data: string, fieldName: string) {
-  if (data.trim().length <= 0) {
-    throw new ValidationError(`${fieldName} is required.`);
-  }
-}
-
-/**
  * Validates a string is a number greater than 0.
  */
 function validateStringIntegerGreaterThanZero(data: string, fieldName: string) {
   if (!isNumeric(data)) {
     throw new ValidationError(`${fieldName} is required and must be a number.`);
   }
-  const value = parseInt(data);
+  const value = parseInt(data, 10);
   validateIntegerGreaterThanZero(value, fieldName);
 }
 
 /**
- * Validates a string is a number greater than 0.
+ * Validates the request of InsertSongbook API
  */
-function validateIntegerGreaterThanZero(data: number, fieldName: string) {
-  if (data <= 0) {
-    throw new ValidationError(`${fieldName} must be greater than 0.`);
-  }
+export function validateInsertSongbookRequest(songbook: Songbook) {
+  validateSongbook(songbook, "");
 }
 
 /**
- * Validates a string is a valid uuid.
+ * Validates the request of InsertSong API
  */
-function validateUuid(data: string, fieldName: String) {
-  if (!validate(data) || data == '00000000-0000-0000-0000-000000000000') {
-    throw new ValidationError(`${fieldName} is not a valid UUID.`);
-  }
+export function validateInsertSongRequest(song: Song) {
+  validateSong(song, "");
+}
+
+/**
+ * Validates the request of InsertLyric API
+ */
+export function validateInsertLyricRequest(lyric: Lyric) {
+  validateLyric(lyric, "");
+}
+
+/**
+ * Validates the request of InsertPendingSongAPI
+ */
+export function validateInsertPendingSongRequest(pendingSong: PendingSong) {
+  validatePendingSong(pendingSong, "");
+}
+
+/**
+ * Validates the request of RejectPendingSong API
+ */
+export function validateRejectPendingSongRequest(
+  request: RejectPendingSongRequest
+) {
+  validateUuid(request.pendingSong.id, "id");
+  validateString(request.rejectionReason, "rejectionReason");
+}
+
+/**
+ * Validates the request of AcceptPendingSong API
+ */
+export function validateAcceptPendingSongRequest(
+  request: AcceptPendingSongRequest
+) {
+  validatePendingSong(request.pendingSong, "pendingSong.");
+  validateString(request.acceptanceNote, "acceptanceNote");
+}
+
+/**
+ * Validates the request of Search API
+ */
+export function validateSearchRequest(request: SearchRequest) {
+  validateString(request.searchText, "searchText");
+}
+
+/**
+ * Validates the request of GetSongs API
+ */
+export function validateGetSongsRequest(songbookId: string) {
+  validateString(songbookId, "songbookId");
+}
+
+/**
+ * Validates the request of a GetSong API
+ */
+export function validateGetSongRequest(songbookId: string, number: string) {
+  validateString(songbookId, "songbookId");
+  validateStringIntegerGreaterThanZero(number, "number");
 }

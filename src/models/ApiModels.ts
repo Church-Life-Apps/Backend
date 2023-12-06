@@ -26,10 +26,10 @@ export interface Song {
 
 // Lyric Type Enum
 export enum LyricType {
-  LYRIC_TYPE_VERSE = 'LYRIC_TYPE_VERSE',
-  LYRIC_TYPE_PRECHORUS = 'LYRIC_TYPE_PRECHORUS',
-  LYRIC_TYPE_CHORUS = 'LYRIC_TYPE_CHORUS',
-  LYRIC_TYPE_BRIDGE = 'LYRIC_TYPE_BRIDGE',
+  LYRIC_TYPE_VERSE = "LYRIC_TYPE_VERSE",
+  LYRIC_TYPE_PRECHORUS = "LYRIC_TYPE_PRECHORUS",
+  LYRIC_TYPE_CHORUS = "LYRIC_TYPE_CHORUS",
+  LYRIC_TYPE_BRIDGE = "LYRIC_TYPE_BRIDGE",
 }
 
 // Data object for Lyrics APIs
@@ -68,10 +68,10 @@ export interface PendingSong {
  */
 export function toSongbook(data: any): Songbook {
   return {
-    id: data.id ?? '',
-    fullName: data.fullName ?? '',
-    staticMetadataLink: data.staticMetadataLink ?? '',
-    imageUrl: data.imageUrl ?? '',
+    id: data.id ?? "",
+    fullName: data.fullName ?? "",
+    staticMetadataLink: data.staticMetadataLink ?? "",
+    imageUrl: data.imageUrl ?? "",
     openToNewSongs: data.openToNewSongs ?? false,
   };
 }
@@ -81,15 +81,15 @@ export function toSongbook(data: any): Songbook {
  */
 export function toSong(data: any): Song {
   return {
-    id: data.id ?? '',
-    songbookId: data.songbookId ?? '',
+    id: data.id ?? "",
+    songbookId: data.songbookId ?? "",
     number: data.number ?? 0,
-    title: data.title ?? '',
-    author: data.author ?? '',
-    music: data.music ?? '',
-    presentationOrder: data.presentationOrder ?? '',
-    imageUrl: data.imageUrl ?? '',
-    audioUrl: data.audioUrl ?? '',
+    title: data.title ?? "",
+    author: data.author ?? "",
+    music: data.music ?? "",
+    presentationOrder: data.presentationOrder ?? "",
+    imageUrl: data.imageUrl ?? "",
+    audioUrl: data.audioUrl ?? "",
   };
 }
 
@@ -98,10 +98,10 @@ export function toSong(data: any): Song {
  */
 export function toLyric(data: any): Lyric {
   return {
-    songId: data.songId ?? '',
-    lyricType: data.lyricType ?? '',
+    songId: data.songId ?? "",
+    lyricType: data.lyricType ?? "",
     verseNumber: data.verseNumber ?? 0,
-    lyrics: data.lyrics ?? '',
+    lyrics: data.lyrics ?? "",
   };
 }
 
@@ -109,20 +109,20 @@ export function toLyric(data: any): Lyric {
  * Converts an object to a PendingSong object.
  */
 export function toPendingSong(data: any): PendingSong {
-  const lyrics: Lyric[] = data.lyrics.map((lyricJson: any) => {
-    return toLyric(lyricJson);
-  });
+  const lyrics: Lyric[] = data.lyrics.map((lyricJson: any) =>
+    toLyric(lyricJson)
+  );
   return {
-    id: data.id ?? '',
-    songbookId: data.songbookId ?? '',
+    id: data.id ?? "",
+    songbookId: data.songbookId ?? "",
     number: data.number ?? 0,
-    title: data.title ?? '',
-    author: data.author ?? '',
-    music: data.music ?? '',
-    presentationOrder: data.presentationOrder ?? '',
-    imageUrl: data.imageUrl ?? '',
-    audioUrl: data.audioUrl ?? '',
-    lyrics: lyrics,
+    title: data.title ?? "",
+    author: data.author ?? "",
+    music: data.music ?? "",
+    presentationOrder: data.presentationOrder ?? "",
+    imageUrl: data.imageUrl ?? "",
+    audioUrl: data.audioUrl ?? "",
+    lyrics,
     requesterName: data.requesterName,
     requesterEmail: data.requesterEmail,
     requesterNote: data.requesterNote,
@@ -134,15 +134,15 @@ export function toPendingSong(data: any): PendingSong {
  */
 export function pendingSongToSong(pendingSong: PendingSong): Song {
   return {
-    id: pendingSong.id ?? '',
-    songbookId: pendingSong.songbookId ?? '',
+    id: pendingSong.id ?? "",
+    songbookId: pendingSong.songbookId ?? "",
     number: pendingSong.number ?? 0,
-    title: pendingSong.title ?? '',
-    author: pendingSong.author ?? '',
-    music: pendingSong.music ?? '',
-    presentationOrder: pendingSong.presentationOrder ?? '',
-    imageUrl: pendingSong.imageUrl ?? '',
-    audioUrl: pendingSong.audioUrl ?? '',
+    title: pendingSong.title ?? "",
+    author: pendingSong.author ?? "",
+    music: pendingSong.music ?? "",
+    presentationOrder: pendingSong.presentationOrder ?? "",
+    imageUrl: pendingSong.imageUrl ?? "",
+    audioUrl: pendingSong.audioUrl ?? "",
   };
 }
 
@@ -156,7 +156,7 @@ export function toRejectPendingSongRequest(
 ): RejectPendingSongRequest {
   return {
     pendingSong: toPendingSong(data.pendingSong),
-    rejectionReason: data.rejectionReason ?? '',
+    rejectionReason: data.rejectionReason ?? "",
   };
 }
 
@@ -170,7 +170,7 @@ export function toAcceptPendingSongRequest(
 ): AcceptPendingSongRequest {
   return {
     pendingSong: toPendingSong(data.pendingSong),
-    acceptanceNote: data.acceptanceNote ?? '',
+    acceptanceNote: data.acceptanceNote ?? "",
   };
 }
 
@@ -181,8 +181,8 @@ export interface SearchRequest {
 
 export function toSearchRequest(data: any): SearchRequest {
   return {
-    searchText: data.searchText ?? '',
-    songbook: data.songbook ?? '',
+    searchText: data.searchText ?? "",
+    songbook: data.songbook ?? "",
   };
 }
 

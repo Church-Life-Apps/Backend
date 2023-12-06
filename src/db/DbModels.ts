@@ -26,10 +26,10 @@ export interface DbSong {
 
 // Db Lyric Type Enum
 export enum LyricType {
-  LYRIC_TYPE_VERSE = 'LYRIC_TYPE_VERSE',
-  LYRIC_TYPE_PRECHORUS = 'LYRIC_TYPE_PRECHORUS',
-  LYRIC_TYPE_CHORUS = 'LYRIC_TYPE_CHORUS',
-  LYRIC_TYPE_BRIDGE = 'LYRIC_TYPE_BRIDGE',
+  LYRIC_TYPE_VERSE = "LYRIC_TYPE_VERSE",
+  LYRIC_TYPE_PRECHORUS = "LYRIC_TYPE_PRECHORUS",
+  LYRIC_TYPE_CHORUS = "LYRIC_TYPE_CHORUS",
+  LYRIC_TYPE_BRIDGE = "LYRIC_TYPE_BRIDGE",
 }
 
 // Data object for Lyrics table
@@ -68,14 +68,14 @@ export interface DbPendingSong {
  */
 export function pendingSongToSong(pendingSong: DbPendingSong): DbSong {
   return {
-    id: pendingSong.id ?? '',
-    songbookId: pendingSong.songbookId ?? '',
+    id: pendingSong.id ?? "",
+    songbookId: pendingSong.songbookId ?? "",
     number: pendingSong.number ?? 0,
-    title: pendingSong.title ?? '',
-    author: pendingSong.author ?? '',
-    music: pendingSong.music ?? '',
-    presentationOrder: pendingSong.presentationOrder ?? '',
-    imageUrl: pendingSong.imageUrl ?? '',
-    audioUrl: pendingSong.audioUrl ?? '',
+    title: pendingSong.title ?? "",
+    author: pendingSong.author ?? "",
+    music: pendingSong.music ?? "",
+    presentationOrder: pendingSong.presentationOrder ?? "",
+    imageUrl: pendingSong.imageUrl ?? "",
+    audioUrl: pendingSong.audioUrl ?? "",
   };
 }
