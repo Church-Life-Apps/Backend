@@ -1,13 +1,13 @@
-import {SongsDb} from '../db/SongsDb';
+import { SongsDb } from "../db/SongsDb";
 import {
   Lyric,
   PendingSong,
   Song,
   Songbook,
   SongWithLyrics,
-} from '../models/ApiModels';
-import {toDbPendingSong} from '../models/ModelConversion';
-import {isNumeric} from '../utils/StringUtils';
+} from "../models/ApiModels";
+import { toDbPendingSong } from "../models/ModelConversion";
+import { isNumeric } from "../utils/StringUtils";
 
 export class SongsService {
   songsDb: SongsDb;
@@ -18,21 +18,21 @@ export class SongsService {
 
   // INSERT Functions
   async insertSongbookMethod(songbook: Songbook): Promise<Songbook> {
-    return await this.songsDb.insertSongbook(songbook);
+    return this.songsDb.insertSongbook(songbook);
   }
 
   async upsertSongMethod(song: Song): Promise<Song> {
-    return await this.songsDb.upsertSong(song);
+    return this.songsDb.upsertSong(song);
   }
 
   async insertLyricMethod(lyric: Lyric): Promise<Lyric> {
-    return await this.songsDb.upsertLyric(lyric);
+    return this.songsDb.upsertLyric(lyric);
   }
 
   async insertPendingSongMethod(
     pendingSong: PendingSong
   ): Promise<PendingSong> {
-    return await this.songsDb.insertPendingSong(toDbPendingSong(pendingSong));
+    return this.songsDb.insertPendingSong(toDbPendingSong(pendingSong));
   }
 
   async rejectPendingSongMethod(
@@ -46,10 +46,9 @@ export class SongsService {
       );
       // TODO: Send a loving and gentle email to ${deletedSong.requesterEmail} notifying them their song has been rejected.
       return true;
-    } else {
-      console.log(`Pending song ${pendingSong.id} not found.`);
-      return false;
     }
+    console.log(`Pending song ${pendingSong.id} not found.`);
+    return false;
   }
 
   async acceptPendingSongMethod(
@@ -69,29 +68,28 @@ export class SongsService {
 
   // SELECT Functions
   async getSongbooks(): Promise<Songbook[]> {
-    return await this.songsDb.querySongbooks();
+    return this.songsDb.querySongbooks();
   }
 
   async getSongsMethod(songbookId: string): Promise<Song[]> {
-    return await this.songsDb.querySongsForSongbook(songbookId);
+    return this.songsDb.querySongsForSongbook(songbookId);
   }
 
   async getSongWithLyricsMethod(
     songbookId: string,
     number: number
   ): Promise<SongWithLyrics> {
-    return await this.songsDb.querySongWithLyrics(songbookId, number);
+    return this.songsDb.querySongWithLyrics(songbookId, number);
   }
 
   async getPendingSongs(): Promise<PendingSong[]> {
-    return await this.songsDb.queryPendingSongs();
+    return this.songsDb.queryPendingSongs();
   }
 
   async searchSongs(searchText: string, songbook: string): Promise<Song[]> {
     if (isNumeric(searchText)) {
-      return await this.songsDb.searchSongsByNumber(searchText, songbook);
-    } else {
-      return await this.songsDb.searchSongsByText(searchText, songbook);
+      return this.songsDb.searchSongsByNumber(searchText, songbook);
     }
+    return this.songsDb.searchSongsByText(searchText, songbook);
   }
 }

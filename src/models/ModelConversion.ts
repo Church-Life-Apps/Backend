@@ -1,5 +1,5 @@
-import {DbLyric, DbPendingSong} from '../db/DbModels';
-import {Lyric, PendingSong} from './ApiModels';
+import { DbPendingSong } from "../db/DbModels";
+import { PendingSong } from "./ApiModels";
 
 /**
  * Data model conversion helpers.
@@ -8,7 +8,9 @@ import {Lyric, PendingSong} from './ApiModels';
  * they can just be used interchangeably by typescript.
  */
 
-export function toDbPendingSong(pendingSong: PendingSong): DbPendingSong {
+export default function toDbPendingSong(
+  pendingSong: PendingSong
+): DbPendingSong {
   return {
     id: pendingSong.id,
     songbookId: pendingSong.songbookId,

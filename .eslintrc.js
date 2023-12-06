@@ -1,18 +1,32 @@
-/* eslint-disable prettier/prettier */
 module.exports = {
   env: {
-    node: 1,
-    es2021: true,
+    node: true,
+    es2022: true,
+    commonjs: true,
   },
 
-  extends: ['airbnb-base', 'eslint-config-prettier'],
-  parser: '@typescript-eslint/parser',
+  extends: ["airbnb-base", "airbnb-typescript/base", "eslint-config-prettier"],
+  parser: "@typescript-eslint/parser",
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
+    ecmaVersion: "latest",
+    sourceType: "module",
+    project: true,
   },
-  plugins: ['@typescript-eslint', 'eslint-plugin-prettier'],
+  plugins: ["@typescript-eslint", "prettier"],
   rules: {
-    'prettier/prettier': ['error', {singleQuote: true}],
+    "prettier/prettier": [
+      "warn",
+      {
+        bracketSpacing: true,
+        tabWidth: 2,
+        singleQuote: false,
+      },
+    ],
+    "no-unused-vars": "warn",
+    "no-console": "off",
+    "func-names": "off",
+    "no-plusplus": "off",
+    "no-process-exit": "off",
+    "class-methods-use-this": "off",
   },
 };
