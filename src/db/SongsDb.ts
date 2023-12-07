@@ -45,7 +45,7 @@ const defaultPool = new Pool({
   },
 });
 
-export class SongsDb {
+export default class SongsDb {
   private pool: Pool;
 
   constructor(pool: Pool | null) {

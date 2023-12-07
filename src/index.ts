@@ -14,7 +14,7 @@ import {
   validateRejectPendingSongRequest,
   validateSearchRequest,
 } from "./helpers/RequestValidationHelpers";
-import { SongsService } from "./services/SongsService";
+import SongsService from "./services/SongsService";
 import { DatabaseError, ValidationError } from "./helpers/ErrorHelpers";
 
 import {

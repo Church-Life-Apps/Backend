@@ -1,4 +1,4 @@
-import { SongsDb } from "../db/SongsDb";
+import SongsDb from "../db/SongsDb";
 import {
   Lyric,
   PendingSong,
@@ -9,7 +9,7 @@ import {
 import { toDbPendingSong } from "../models/ModelConversion";
 import { isNumeric } from "../utils/StringUtils";
 
-export class SongsService {
+export default class SongsService {
   songsDb: SongsDb;
 
   constructor() {

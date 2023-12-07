@@ -8,9 +8,7 @@ import { PendingSong } from "./ApiModels";
  * they can just be used interchangeably by typescript.
  */
 
-export default function toDbPendingSong(
-  pendingSong: PendingSong
-): DbPendingSong {
+export function toDbPendingSong(pendingSong: PendingSong): DbPendingSong {
   return {
     id: pendingSong.id,
     songbookId: pendingSong.songbookId,
