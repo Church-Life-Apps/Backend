@@ -1,4 +1,4 @@
-import * as dotenv from "dotenv";
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import * as path from "path";
@@ -46,8 +46,6 @@ function handleErrorsAndReturn(
     res.status(400).send(`Error: Bad Request: ${e.message}`);
   }
 }
-
-dotenv.config();
 
 const app = express();
 
