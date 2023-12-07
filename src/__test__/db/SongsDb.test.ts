@@ -63,6 +63,23 @@ async function resetDatabase() {
   await testPool.query("DELETE FROM songbooks");
 }
 
+function fail(message: string) {
+  throw new Error(message);
+}
+
+async function assertFails(func: () => Promise<any>, message: string) {
+  try {
+    await func();
+  } catch (e: any) {
+    return;
+  }
+  fail(`Manually failing due to: ${message}`);
+}
+
+function assertJsonEquality(one: any, two: any) {
+  expect(JSON.stringify(one)).toBe(JSON.stringify(two));
+}
+
 const songbookId = "shl";
 const songbookName = "Songs and Hymns of Life";
 const smLink = "s_m_link";
@@ -410,20 +427,3 @@ describe("Test Database Tables", () => {
     assertJsonEquality(query9, [testSong, song2]);
   });
 });
-
-async function assertFails(func: () => Promise<any>, message: string) {
-  try {
-    await func();
-  } catch (e: any) {
-    return;
-  }
-  fail(`Manually failing due to: ${message}`);
-}
-
-function assertJsonEquality(one: any, two: any) {
-  expect(JSON.stringify(one)).toBe(JSON.stringify(two));
-}
-
-function fail(message: string) {
-  throw new Error(message);
-}
