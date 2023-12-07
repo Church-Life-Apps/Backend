@@ -17,7 +17,7 @@ import {
   QUERY_CREATE_SONGS_TABLE,
   QUERY_DROP_INDEXES,
 } from "../../db/DbQueries";
-import { SongsDb } from "../../db/SongsDb";
+import SongsDb from "../../db/SongsDb";
 import { Song } from "../../models/ApiModels";
 
 require("dotenv").config();

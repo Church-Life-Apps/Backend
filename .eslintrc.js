@@ -3,6 +3,7 @@ module.exports = {
     node: true,
     es2022: true,
     commonjs: true,
+    jest: true,
   },
 
   extends: ["airbnb-base", "airbnb-typescript/base", "eslint-config-prettier"],
@@ -28,5 +29,8 @@ module.exports = {
     "no-plusplus": "off",
     "no-process-exit": "off",
     "class-methods-use-this": "off",
+    "import/prefer-default-export": [
+      "off"
+    ]
   },
 };
