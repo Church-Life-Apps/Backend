@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: >-
+  Serverless API stack for the Songs & Hymns app. Part of Church Life Apps.
+Transform:
+- AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 3
+
+# Resources declares the AWS resources that you want to include in the stack
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
+Resources:
+  # Each Lambda function is defined by properties:
+  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+
+  # This is a Lambda function config associated with the source code: get-all-items.js
+  listBooksFunction:
+    Type: AWS::Serverless::Function
+    FunctionName: SongsHymns-listSongbooks
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2022"
+        Sourcemap: true
+        EntryPoints: 
+        - src/lambdahandlers.ts
+    Properties:
+      CodeUri: .
+      Handler: src/lambdahandlers.listSongbooksHandler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Timeout: 100
+      Description: Lists available song books
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /songbooks
+            Method: GET
+    
