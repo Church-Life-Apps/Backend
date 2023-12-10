@@ -132,3 +132,6 @@ dist
 # Local Envs
 .env
 ca-certificate.crt
+
+# AWS
+.aws-sam

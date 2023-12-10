@@ -2,11 +2,8 @@
  * Strings and functions for DB Queries
  */
 
-import {
-  formatForDbEntry,
-  formatForPostgresTsQuery,
-} from "../utils/StringUtils";
-import { DbLyric, LyricType } from "./DbModels";
+import { formatForPostgresTsQuery } from "../utils/StringUtils";
+import { LyricType } from "./DbModels";
 
 // Normal Queries
 export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`;
@@ -136,7 +133,7 @@ export function buildSearchSongByNumberQuery(
   songbook: string
 ): string {
   let songbookClause = "";
-  if (songbook != "") {
+  if (songbook !== "") {
     songbookClause = `AND songbook_id = '${songbook}'`;
   }
   return `SELECT * FROM songs 
@@ -154,7 +151,7 @@ export function buildSearchSongsByTextQuery(
   songbook: string
 ): string {
   let songbookClause = "";
-  if (songbook != "") {
+  if (songbook !== "") {
     songbookClause = `AND s.songbook_id = '${songbook}'`;
   }
   const lyricSearchText = formatForPostgresTsQuery(searchText);

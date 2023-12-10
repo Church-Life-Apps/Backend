@@ -6,7 +6,7 @@
  * Returns true if a string is a number, false otherwise.
  */
 export function isNumeric(word: string): boolean {
-  return word.length > 0 && !isNaN(+word);
+  return word.length > 0 && !Number.isNaN(+word);
 }
 
 /**
