@@ -4,7 +4,6 @@ import { APIGatewayEvent, Handler } from "aws-lambda";
 import NotFoundError from "./errors/NotFoundError";
 import {
   acceptPendingSong,
-  createLyrics,
   createPendingSong,
   createSong,
   createSongbook,
@@ -18,6 +17,51 @@ import {
 
 export const listSongbooksHandler: Handler = async () => listSongbooks();
 
+export const createSongbookHandler: Handler = async (
+  event: APIGatewayEvent
+) => {
+  console.log(event);
+  const creationRequest = JSON.parse(event.body!);
+  return createSongbook(creationRequest);
+};
+
+export const listSongsHandler: Handler = async (event: APIGatewayEvent) => {
+  console.log(event);
+  const songbookId = event.pathParameters?.songbookId;
+  if (songbookId === undefined) {
+    throw new Error("Songbook ID was undefined");
+  }
+  return listSongs(songbookId);
+};
+
+export const createSongHandler: Handler = async (event: APIGatewayEvent) => {
+  console.log(event);
+  const songbookId = event.pathParameters?.songbookId;
+  const creationRequest = JSON.parse(event.body!);
+
+  if (songbookId === undefined) {
+    throw new Error("Songbook ID was undefined");
+  }
+  const number = event.pathParameters?.songNumber;
+  if (number === undefined) {
+    throw new Error("Song number was undefined");
+  }
+  return createSong(songbookId, parseInt(number, 10), creationRequest);
+};
+
+export const getSongHandler: Handler = async (event: APIGatewayEvent) => {
+  console.log(event);
+  const songbookId = event.pathParameters?.songbookId;
+  const songNumber = event.pathParameters?.songNumber;
+  if (songbookId === undefined) {
+    throw new Error("songbookId is undefined");
+  }
+  if (songNumber === undefined) {
+    throw new Error("songNumber is undefined");
+  }
+  return getSong(songbookId, parseInt(songNumber, 10));
+};
+
 export const handler: Handler = async (event: APIGatewayEvent) => {
   console.log("Received event:", JSON.stringify(event, null, 2));
 
@@ -29,33 +73,6 @@ export const handler: Handler = async (event: APIGatewayEvent) => {
 
   try {
     switch (event.path) {
-      case "/songbooks":
-        if (event.httpMethod === "GET") {
-          body = await listSongbooks();
-        } else if (event.httpMethod === "POST") {
-          body = await createSongbook(event);
-        } else {
-          throw new Error("Method not supported");
-        }
-        break;
-      case "/songbooks/{songbookId}":
-        if (event.httpMethod === "GET") {
-          body = await listSongs(event);
-        } else if (event.httpMethod === "POST") {
-          await createSong(event);
-        } else {
-          throw new Error("Method not supported");
-        }
-        break;
-      case "/songbooks/{songbookId}/{songId}":
-        if (event.httpMethod === "GET") {
-          body = await getSong(event);
-        } else if (event.httpMethod === "POST") {
-          await createLyrics(event);
-        } else {
-          throw new Error("Method not supported");
-        }
-        break;
       case "/pending/songs":
         if (event.httpMethod === "GET") {
           body = await listPendingSongs();

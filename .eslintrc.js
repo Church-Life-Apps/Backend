@@ -29,8 +29,6 @@ module.exports = {
     "no-plusplus": "off",
     "no-process-exit": "off",
     "class-methods-use-this": "off",
-    "import/prefer-default-export": [
-      "off"
-    ]
+    "import/prefer-default-export": ["off"],
   },
 };

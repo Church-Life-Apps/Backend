@@ -2,6 +2,16 @@
  * Data Models for API Request and Response objects.
  */
 
+export interface CreateSongRequest {
+  title: string;
+  author: string;
+  music: string;
+  lyrics: Lyric[];
+  presentationOrder: string;
+  imageUrl: string;
+  audioUrl: string;
+}
+
 // Data object for Songbooks APIs
 export interface Songbook {
   id: string;

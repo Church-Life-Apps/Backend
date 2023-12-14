@@ -6,7 +6,27 @@ Transform:
 
 Globals:
   Function:
-    Timeout: 3
+    Timeout: 5
+
+Parameters:
+  # Environment:
+  #   Type: String
+  #   Default: "dev"
+  #   AllowedValues: 
+  #     - "dev"
+  #     - "prod"
+  DBHost:
+    Type: String
+    Default: "10.0.137.58"
+  DBUser:
+    Type: String
+    Default: "songs_api"
+  DBPort:
+    Type: String
+    Default: "5432"
+  DBName:
+    Type: String
+    Default: "songshymns"
 
 # Resources declares the AWS resources that you want to include in the stack
 # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/resources-section-structure.html
@@ -14,10 +34,26 @@ Resources:
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
+  SongsAndHymnsLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: "SongsAndHymnsLambdaRole"
+      Description: "Defines the role which can be assumed by Lambdas for the Songs and Hymns API"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+
   # This is a Lambda function config associated with the source code: get-all-items.js
-  listBooksFunction:
+  ListSongbooksFunction:
     Type: AWS::Serverless::Function
-    FunctionName: SongsHymns-listSongbooks
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
       BuildProperties:
@@ -27,18 +63,187 @@ Resources:
         EntryPoints: 
         - src/lambdahandlers.ts
     Properties:
+      FunctionName: SongsHymns-listSongbooks
+      Description: Lists available song books
       CodeUri: .
       Handler: src/lambdahandlers.listSongbooksHandler
       Runtime: nodejs20.x
       Architectures:
       - x86_64
       MemorySize: 128
-      Timeout: 100
-      Description: Lists available song books
+      Environment:
+        Variables:
+          PG_DATABASE: !Ref "DBName"
+          PG_HOST: !Ref "DBHost"
+          PG_PORT: !Ref "DBPort"
+          PG_USER: !Ref "DBUser"
+          PG_PASSWORD: '{{resolve:secretsmanager:dev/cla/songs-hymns-db-api-user-credentials:SecretString:password}}'
       Events:
         Api:
           Type: Api
           Properties:
             Path: /songbooks
             Method: GET
-    
+      Role: !GetAtt SongsAndHymnsLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds: 
+          - sg-05811fd9b24bdb53c
+        SubnetIds:
+          - subnet-0fc50be933343606d
+          - subnet-09798a19e44fa6734
+  CreateSongbookFunction:
+    Type: AWS::Serverless::Function
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2022"
+        Sourcemap: true
+        EntryPoints: 
+        - src/lambdahandlers.ts
+    Properties:
+      FunctionName: SongsHymns-createSongbook
+      Description: Lists available song books
+      CodeUri: .
+      Handler: src/lambdahandlers.createSongbookHandler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Environment:
+        Variables:
+          PG_DATABASE: !Ref "DBName"
+          PG_HOST: !Ref "DBHost"
+          PG_PORT: !Ref "DBPort"
+          PG_USER: !Ref "DBUser"
+          PG_PASSWORD: '{{resolve:secretsmanager:dev/cla/songs-hymns-db-api-user-credentials:SecretString:password}}'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /songbooks
+            Method: POST
+      Role: !GetAtt SongsAndHymnsLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds: 
+          - sg-05811fd9b24bdb53c
+        SubnetIds:
+          - subnet-0fc50be933343606d
+          - subnet-09798a19e44fa6734
+  ListSongsFunction:
+    Type: AWS::Serverless::Function
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2022"
+        Sourcemap: true
+        EntryPoints: 
+        - src/lambdahandlers.ts
+    Properties:
+      FunctionName: SongsHymns-listSongs
+      Description: Lists songs contained in a song book
+      CodeUri: .
+      Handler: src/lambdahandlers.listSongsHandler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Environment:
+        Variables:
+          PG_DATABASE: !Ref "DBName"
+          PG_HOST: !Ref "DBHost"
+          PG_PORT: !Ref "DBPort"
+          PG_USER: !Ref "DBUser"
+          PG_PASSWORD: '{{resolve:secretsmanager:dev/cla/songs-hymns-db-api-user-credentials:SecretString:password}}'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /songbooks/{songbookId}/songs
+            Method: GET
+      Role: !GetAtt SongsAndHymnsLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds: 
+          - sg-05811fd9b24bdb53c
+        SubnetIds:
+          - subnet-0fc50be933343606d
+          - subnet-09798a19e44fa6734
+  GetSongFunction:
+    Type: AWS::Serverless::Function
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2022"
+        Sourcemap: true
+        EntryPoints: 
+        - src/lambdahandlers.ts
+    Properties:
+      FunctionName: SongsHymns-getSong
+      Description: Gets details for a song in a song book
+      CodeUri: .
+      Handler: src/lambdahandlers.getSongHandler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Environment:
+        Variables:
+          PG_DATABASE: !Ref "DBName"
+          PG_HOST: !Ref "DBHost"
+          PG_PORT: !Ref "DBPort"
+          PG_USER: !Ref "DBUser"
+          PG_PASSWORD: '{{resolve:secretsmanager:dev/cla/songs-hymns-db-api-user-credentials:SecretString:password}}'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /songbooks/{songbookId}/songs/{songNumber}
+            Method: GET
+      Role: !GetAtt SongsAndHymnsLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds: 
+          - sg-05811fd9b24bdb53c
+        SubnetIds:
+          - subnet-0fc50be933343606d
+          - subnet-09798a19e44fa6734
+  CreateSongFunction:
+    Type: AWS::Serverless::Function
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2022"
+        Sourcemap: true
+        EntryPoints: 
+        - src/lambdahandlers.ts
+    Properties:
+      FunctionName: SongsHymns-createSong
+      Description: Creates a song in a song book
+      CodeUri: .
+      Handler: src/lambdahandlers.createSongHandler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Environment:
+        Variables:
+          PG_DATABASE: !Ref "DBName"
+          PG_HOST: !Ref "DBHost"
+          PG_PORT: !Ref "DBPort"
+          PG_USER: !Ref "DBUser"
+          PG_PASSWORD: '{{resolve:secretsmanager:dev/cla/songs-hymns-db-api-user-credentials:SecretString:password}}'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /songbooks/{songbookId}/songs/{songNumber}
+            Method: POST
+      Role: !GetAtt SongsAndHymnsLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds: 
+          - sg-05811fd9b24bdb53c
+        SubnetIds:
+          - subnet-0fc50be933343606d
+          - subnet-09798a19e44fa6734

@@ -1,5 +1,4 @@
 import { validate } from "uuid";
-import { isNumeric } from "../utils/StringUtils";
 import { ValidationError } from "./ErrorHelpers";
 import {
   Songbook,
@@ -82,17 +81,6 @@ function validatePendingSong(pendingSong: PendingSong, prefix: string) {
 }
 
 /**
- * Validates a string is a number greater than 0.
- */
-function validateStringIntegerGreaterThanZero(data: string, fieldName: string) {
-  if (!isNumeric(data)) {
-    throw new ValidationError(`${fieldName} is required and must be a number.`);
-  }
-  const value = parseInt(data, 10);
-  validateIntegerGreaterThanZero(value, fieldName);
-}
-
-/**
  * Validates the request of InsertSongbook API
  */
 export function validateInsertSongbookRequest(songbook: Songbook) {
@@ -157,7 +145,7 @@ export function validateGetSongsRequest(songbookId: string) {
 /**
  * Validates the request of a GetSong API
  */
-export function validateGetSongRequest(songbookId: string, number: string) {
+export function validateGetSongRequest(songbookId: string, number: number) {
   validateString(songbookId, "songbookId");
-  validateStringIntegerGreaterThanZero(number, "number");
+  validateIntegerGreaterThanZero(number, "number");
 }
