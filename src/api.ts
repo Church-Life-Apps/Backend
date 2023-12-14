@@ -14,9 +14,10 @@ import SongsService from "./services/SongsService";
 import { DatabaseError, ValidationError } from "./helpers/ErrorHelpers";
 
 import {
+  CreateSongRequest,
+  Lyric,
   SearchResponse,
   toAcceptPendingSongRequest,
-  toLyric,
   toPendingSong,
   toRejectPendingSongRequest,
   toSearchRequest,
@@ -24,6 +25,11 @@ import {
   toSongbook,
 } from "./models/ApiModels";
 import NotFoundError from "./errors/NotFoundError";
+
+const makeHeaders = () => ({
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+});
 
 /**
  * Handles API errors
@@ -42,26 +48,25 @@ function formatErrorResponse(e: unknown) {
     statusCode = 400;
     message = `Validation Error: ${e.message}`;
   } else if (e instanceof DatabaseError) {
-    statusCode = 400;
+    statusCode = 500;
     message = `Db Error: ${e.message}`;
   } else if (e instanceof NotFoundError) {
     statusCode = 404;
   } else {
-    console.error(e);
-    message = `Internal server error`;
+    throw e;
   }
 
   return {
     statusCode,
-    headers: { "Content-Type": "application/json" },
+    headers: makeHeaders(),
     body: formatBody(message),
   };
 }
 
-const formatSuccessResponse = (body: any) => ({
-  statusCode: 200,
-  body,
-  headers: { "Conent-Type": "application/json" },
+const formatSuccessResponse = (body: any = undefined, statusCode = 200) => ({
+  statusCode,
+  body: JSON.stringify(body),
+  headers: makeHeaders(),
 });
 
 const songsService = new SongsService();
@@ -76,64 +81,91 @@ export const listSongbooks = async () => {
 };
 
 // List Songs API
-export const listSongs = async (event: APIGatewayEvent) => {
+export const listSongs = async (songbookId: string | undefined) => {
   try {
-    const songbookId = event.pathParameters?.songbookId;
-    if (songbookId === undefined) {
+    if (songbookId === undefined || songbookId === "") {
       throw new NotFoundError();
     }
     validateGetSongsRequest(songbookId);
-    return await songsService.getSongsMethod(songbookId);
+    return formatSuccessResponse(await songsService.getSongsMethod(songbookId));
   } catch (e) {
     return formatErrorResponse(e);
   }
 };
 
 // Get Song [With Lyrics] API
-export const getSong = async (event: APIGatewayEvent) => {
-  const songbookId = event.pathParameters?.songbookId;
-  const number = event.pathParameters?.songNumber;
-  if (songbookId === undefined || number === undefined) {
+export const getSong = async (songbookId: string, songNumber: number) => {
+  if (songbookId === undefined || songNumber === undefined) {
     throw new NotFoundError();
   }
-  validateGetSongRequest(songbookId, number);
-  return songsService.getSongWithLyricsMethod(songbookId, parseInt(number, 10));
+  validateGetSongRequest(songbookId, songNumber);
+  return formatSuccessResponse(
+    await songsService.getSongWithLyricsMethod(songbookId, songNumber)
+  );
 };
 
 // List Pending Songs API
-export const listPendingSongs = () => songsService.getPendingSongs();
+export const listPendingSongs = async () =>
+  formatSuccessResponse(await songsService.getPendingSongs());
 
 // Create Songbook API
 // TODO: Make this a "protected"/internal API
-export const createSongbook = async (event: APIGatewayEvent) => {
+export const createSongbook = async (createSongbookRequest: any) => {
   console.log(`Create Songbook API Request received`);
-  const songbook = toSongbook(event.body);
+  const songbook = toSongbook(createSongbookRequest);
   validateInsertSongbookRequest(songbook);
-  const val = await songsService.insertSongbookMethod(songbook);
-  console.log(`Returning ${JSON.stringify(val)}`);
-  return val ?? {};
-};
-
-// Create Song API
-// TODO: Make this a "protected"/internal API
-export const createSong = async (event: APIGatewayEvent) => {
-  console.log(`Create Song API Request received: ${event.path}`);
-  const song = toSong(event.body);
-  validateInsertSongRequest(song);
-  const val = await songsService.upsertSongMethod(song);
-  console.log(`Returning ${JSON.stringify(val)}`);
-  return val ?? {};
+  try {
+    await songsService.insertSongbookMethod(songbook);
+  } catch (e) {
+    return formatErrorResponse(e);
+  }
+  return formatSuccessResponse(`/songbooks/${songbook.id}`, 201);
 };
 
 // Create Lyric API
 // TODO: Make this a "protected"/internal API
-export const createLyrics = async (event: APIGatewayEvent) => {
-  console.log(`Create Lyric API Request received: ${event.path}`);
-  const lyric = toLyric(event.body);
-  validateInsertLyricRequest(lyric);
-  const val = await songsService.insertLyricMethod(lyric);
-  console.log(`Returning ${JSON.stringify(val)}`);
-  return val ?? {};
+const createLyrics = async (
+  songbookId: string,
+  songNumber: number,
+  lyrics: Lyric[]
+) => {
+  console.log(
+    `Create Lyric API Request received: ${songbookId} - ${songNumber} : ${lyrics}`
+  );
+  try {
+    lyrics.forEach(async (lyric) => {
+      validateInsertLyricRequest(lyric);
+      await songsService.insertLyricMethod(lyric);
+    });
+  } catch (e) {
+    return formatErrorResponse(e);
+  }
+  return formatSuccessResponse();
+};
+
+// Create Song API
+// TODO: Make this a "protected"/internal API
+export const createSong = async (
+  bookId: string,
+  number: number,
+  request: CreateSongRequest
+) => {
+  console.log(
+    `Create Song API Request received for book ${bookId}: ${JSON.stringify(
+      request
+    )}`
+  );
+  const song = toSong(request);
+  song.songbookId = bookId;
+  song.number = number;
+  validateInsertSongRequest(song);
+  try {
+    await songsService.upsertSongMethod(song);
+    await createLyrics(bookId, number, request.lyrics);
+  } catch (e) {
+    return formatErrorResponse(e);
+  }
+  return formatSuccessResponse(`/songbooks/${bookId}/${number}`);
 };
 
 // Create Pending Song API
