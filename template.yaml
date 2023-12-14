@@ -91,6 +91,45 @@ Resources:
         SubnetIds:
           - subnet-0fc50be933343606d
           - subnet-09798a19e44fa6734
+   GetSongbookFunction:
+    Type: AWS::Serverless::Function
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2022"
+        Sourcemap: true
+        EntryPoints: 
+        - src/lambdahandlers.ts
+    Properties:
+      FunctionName: SongsHymns-getSongbook
+      Description: Gets a specific song book by ID
+      CodeUri: .
+      Handler: src/lambdahandlers.getSongbookHandler
+      Runtime: nodejs20.x
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Environment:
+        Variables:
+          PG_DATABASE: !Ref "DBName"
+          PG_HOST: !Ref "DBHost"
+          PG_PORT: !Ref "DBPort"
+          PG_USER: !Ref "DBUser"
+          PG_PASSWORD: '{{resolve:secretsmanager:dev/cla/songs-hymns-db-api-user-credentials:SecretString:password}}'
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /songbooks/{songbookId}
+            Method: GET
+      Role: !GetAtt SongsAndHymnsLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds: 
+          - sg-05811fd9b24bdb53c
+        SubnetIds:
+          - subnet-0fc50be933343606d
+          - subnet-09798a19e44fa6734
   CreateSongbookFunction:
     Type: AWS::Serverless::Function
     Metadata: # Manage esbuild properties
@@ -121,8 +160,8 @@ Resources:
         Api:
           Type: Api
           Properties:
-            Path: /songbooks
-            Method: POST
+            Path: /songbooks/{songbookId}
+            Method: PUT
       Role: !GetAtt SongsAndHymnsLambdaRole.Arn
       VpcConfig:
         SecurityGroupIds: 
@@ -239,7 +278,7 @@ Resources:
           Type: Api
           Properties:
             Path: /songbooks/{songbookId}/songs/{songNumber}
-            Method: POST
+            Method: PUT
       Role: !GetAtt SongsAndHymnsLambdaRole.Arn
       VpcConfig:
         SecurityGroupIds: 

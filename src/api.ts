@@ -17,6 +17,7 @@ import {
   CreateSongRequest,
   Lyric,
   SearchResponse,
+  Songbook,
   toAcceptPendingSongRequest,
   toPendingSong,
   toRejectPendingSongRequest,
@@ -80,6 +81,14 @@ export const listSongbooks = async () => {
   }
 };
 
+export const getSongbook = async (songbookId: string) => {
+  try {
+    return formatSuccessResponse(await songsService.getSongbook(songbookId));
+  } catch (e) {
+    return formatErrorResponse(e);
+  }
+};
+
 // List Songs API
 export const listSongs = async (songbookId: string | undefined) => {
   try {
@@ -110,9 +119,13 @@ export const listPendingSongs = async () =>
 
 // Create Songbook API
 // TODO: Make this a "protected"/internal API
-export const createSongbook = async (createSongbookRequest: any) => {
+export const createSongbook = async (
+  songbookId: string,
+  createSongbookRequest: Songbook
+) => {
   console.log(`Create Songbook API Request received`);
   const songbook = toSongbook(createSongbookRequest);
+  songbook.id = songbookId;
   validateInsertSongbookRequest(songbook);
   try {
     await songsService.insertSongbookMethod(songbook);

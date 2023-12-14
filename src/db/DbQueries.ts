@@ -8,6 +8,10 @@ import { LyricType } from "./DbModels";
 // Normal Queries
 export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`;
 
+export function buildFindSongbookQuery(songbookId: string) {
+  return `SELECT * FROM songbooks WHERE id = ${songbookId}`;
+}
+
 export function buildInsertSongbookQuery(
   id: string,
   fullName: string,

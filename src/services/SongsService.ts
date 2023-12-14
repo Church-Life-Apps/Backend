@@ -71,6 +71,10 @@ export default class SongsService {
     return this.songsDb.querySongbooks();
   }
 
+  async getSongbook(songbookId: string): Promise<Songbook> {
+    return this.songsDb.querySongbook(songbookId);
+  }
+
   async getSongsMethod(songbookId: string): Promise<Song[]> {
     return this.songsDb.querySongsForSongbook(songbookId);
   }
