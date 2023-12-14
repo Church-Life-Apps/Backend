@@ -29,7 +29,9 @@ import {
   buildDeleteLyricsForSongQuery,
   buildSearchSongByNumberQuery,
   buildSearchSongsByTextQuery,
+  buildFindSongbookQuery,
 } from "./DbQueries";
+import NotFoundError from "../errors/NotFoundError";
 
 require("dotenv").config();
 
@@ -60,6 +62,18 @@ export default class SongsDb {
     return this.queryDb(QUERY_SELECT_FROM_SONGBOOKS).then((rows) =>
       rows.map((row) => this.mapDbSongbook(row))
     );
+  }
+
+  /**
+   * Queries for a songbook with a specified ID
+   */
+  async querySongbook(songbookId: string): Promise<DbSongbook> {
+    return this.queryDb(buildFindSongbookQuery(songbookId)).then((rows) => {
+      if (rows.length <= 0) {
+        throw new NotFoundError(`Songbook not found for ${songbookId}`);
+      }
+      return this.mapDbSongbook(rows[0]);
+    });
   }
 
   /**
