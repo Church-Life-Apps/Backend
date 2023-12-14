@@ -85,14 +85,9 @@ app.get("/api/songs", async (req, res) => {
 app.get("/api/song", async (req, res) => {
   try {
     const songbookId = (req.query.songbookId as string) ?? "";
-    const number = (req.query.number as string) ?? "";
+    const number = parseInt((req.query.number as string) ?? "", 10);
     validateGetSongRequest(songbookId, number);
-    res.send(
-      await songsService.getSongWithLyricsMethod(
-        songbookId,
-        parseInt(number, 10)
-      )
-    );
+    res.send(await songsService.getSongWithLyricsMethod(songbookId, number));
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
