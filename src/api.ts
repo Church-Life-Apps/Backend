@@ -54,7 +54,7 @@ function formatErrorResponse(e: unknown) {
   } else if (e instanceof NotFoundError) {
     statusCode = 404;
   } else {
-    throw e;
+    statusCode = 500;
   }
 
   return {
@@ -143,17 +143,14 @@ const createLyrics = async (
   lyrics: Lyric[]
 ) => {
   console.log(
-    `Create Lyric API Request received: ${songbookId} - ${songNumber} : ${lyrics}`
+    `Create Lyric API Request received: ${songbookId} - ${songNumber} : ${JSON.stringify(
+      lyrics
+    )}`
   );
-  try {
-    lyrics.forEach(async (lyric) => {
-      validateInsertLyricRequest(lyric);
-      await songsService.insertLyricMethod(lyric);
-    });
-  } catch (e) {
-    return formatErrorResponse(e);
-  }
-  return formatSuccessResponse();
+  lyrics.forEach(async (lyric) => {
+    validateInsertLyricRequest(lyric);
+    await songsService.insertLyricMethod(lyric);
+  });
 };
 
 // Create Song API
@@ -178,7 +175,7 @@ export const createSong = async (
   } catch (e) {
     return formatErrorResponse(e);
   }
-  return formatSuccessResponse(`/songbooks/${bookId}/${number}`);
+  return formatSuccessResponse(`/songbooks/${bookId}/songs/${number}`, 201);
 };
 
 // Create Pending Song API

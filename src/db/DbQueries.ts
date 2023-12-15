@@ -9,7 +9,7 @@ import { LyricType } from "./DbModels";
 export const QUERY_SELECT_FROM_SONGBOOKS = `SELECT * FROM songbooks`;
 
 export function buildFindSongbookQuery(songbookId: string) {
-  return `SELECT * FROM songbooks WHERE id = ${songbookId}`;
+  return `SELECT * FROM songbooks WHERE id = '${songbookId}';`;
 }
 
 export function buildInsertSongbookQuery(

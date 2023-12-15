@@ -91,7 +91,7 @@ Resources:
         SubnetIds:
           - subnet-0fc50be933343606d
           - subnet-09798a19e44fa6734
-   GetSongbookFunction:
+  GetSongbookFunction:
     Type: AWS::Serverless::Function
     Metadata: # Manage esbuild properties
       BuildMethod: esbuild
