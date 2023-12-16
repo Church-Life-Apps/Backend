@@ -1,4 +1,5 @@
 import { APIGatewayEvent } from "aws-lambda";
+import { randomUUID } from "crypto";
 import {
   validateAcceptPendingSongRequest,
   validateGetSongRequest,
@@ -16,12 +17,12 @@ import { DatabaseError, ValidationError } from "./helpers/ErrorHelpers";
 import {
   CreateSongRequest,
   Lyric,
+  SearchRequest,
   SearchResponse,
   Songbook,
   toAcceptPendingSongRequest,
   toPendingSong,
   toRejectPendingSongRequest,
-  toSearchRequest,
   toSong,
   toSongbook,
 } from "./models/ApiModels";
@@ -161,6 +162,7 @@ export const createSong = async (
     )}`
   );
   const song = toSong(request);
+  song.id = randomUUID();
   song.songbookId = bookId;
   song.number = number;
   validateInsertSongRequest(song);
@@ -205,20 +207,22 @@ export const acceptPendingSong = async (event: APIGatewayEvent) => {
   );
 };
 
-export const findSong = async (event: APIGatewayEvent) => {
-  console.debug(`Search API Request received: ${event.path}`);
-  const request = toSearchRequest(event.body);
+export const findSong = async (request: SearchRequest) => {
   validateSearchRequest(request);
   const matchedSongs = await songsService.searchSongs(
     request.searchText,
     request.songbook
   );
-  const response: SearchResponse = {
-    matchedSongs,
-  };
-  console.log(
-    `Returning ${matchedSongs.length} songs with search string: "${request.searchText}" and songbook: "${request.songbook}"`
-  );
-  return response ?? {};
+  try {
+    const response: SearchResponse = {
+      matchedSongs,
+    };
+    console.log(
+      `Returning ${matchedSongs.length} songs with search string: "${request.searchText}" and songbook: "${request.songbook}"`
+    );
+    return formatSuccessResponse(response);
+  } catch (e) {
+    return formatErrorResponse(e);
+  }
   // TODO: Write search API which takes in a search string, and maybe other filters, and returns a list of songs which matches.
 };

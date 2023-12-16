@@ -1,0 +1,345 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "version" : "1.0",
+    "title" : "cla-songs-hymns"
+  },
+  "host" : "api.calebziamba.net",
+  "schemes" : [ "https" ],
+  "paths" : {
+    "/search" : {
+      "post" : {
+        "responses" : { },
+        "x-amazon-apigateway-integration" : {
+          "type" : "aws_proxy",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:236990821203:function:SongsHymns-searchSongs/invocations",
+          "passthroughBehavior" : "when_no_match"
+        }
+      },
+      "options" : {
+        "consumes" : [ "application/json" ],
+        "parameters" : [],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Methods" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Headers" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "type" : "mock",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET','PUT','OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match"
+        }
+      }
+    },
+    "/songbooks" : {
+      "get" : {
+        "responses" : { },
+        "x-amazon-apigateway-integration" : {
+          "type" : "aws_proxy",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:236990821203:function:SongsHymns-listSongbooks/invocations",
+          "passthroughBehavior" : "when_no_match"
+        }
+      }
+    },
+    "/songbooks/{songbookId}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "songbookId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : { },
+        "x-amazon-apigateway-integration" : {
+          "type" : "aws_proxy",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:236990821203:function:SongsHymns-getSongbook/invocations",
+          "passthroughBehavior" : "when_no_match"
+        }
+      },
+      "put" : {
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "songbookId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "CreateSongbookRequest",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CreateSongbookRequest"
+          }
+        } ],
+        "responses" : { },
+        "security" : [ {
+          "api_key" : [ ]
+        } ],
+        "x-amazon-apigateway-request-validator" : "Validate body",
+        "x-amazon-apigateway-integration" : {
+          "type" : "aws_proxy",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:236990821203:function:SongsHymns-createSongbook/invocations",
+          "passthroughBehavior" : "when_no_match"
+        }
+      },
+      "options" : {
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "songbookId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Methods" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Headers" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "type" : "mock",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET','PUT','OPTIONS'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match"
+        }
+      }
+    },
+    "/songbooks/{songbookId}/songs" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "songbookId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : { },
+        "x-amazon-apigateway-integration" : {
+          "type" : "aws_proxy",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:236990821203:function:SongsHymns-listSongs/invocations",
+          "passthroughBehavior" : "when_no_match"
+        }
+      }
+    },
+    "/songbooks/{songbookId}/songs/{songNumber}" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "songbookId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "songNumber",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : { },
+        "x-amazon-apigateway-integration" : {
+          "type" : "aws_proxy",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:236990821203:function:SongsHymns-getSong/invocations",
+          "passthroughBehavior" : "when_no_match"
+        }
+      },
+      "put" : {
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "songbookId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "songNumber",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "in" : "body",
+          "name" : "CreateSongRequest",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/definitions/CreateSongRequest"
+          }
+        } ],
+        "responses" : { },
+        "security" : [ {
+          "api_key" : [ ]
+        } ],
+        "x-amazon-apigateway-request-validator" : "Validate body",
+        "x-amazon-apigateway-integration" : {
+          "type" : "aws_proxy",
+          "httpMethod" : "POST",
+          "uri" : "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:236990821203:function:SongsHymns-createSong/invocations",
+          "passthroughBehavior" : "when_no_match"
+        }
+      },
+      "options" : {
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "songbookId",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "songNumber",
+          "in" : "path",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "headers" : {
+              "Access-Control-Allow-Origin" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Methods" : {
+                "type" : "string"
+              },
+              "Access-Control-Allow-Headers" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-integration" : {
+          "type" : "mock",
+          "responses" : {
+            "default" : {
+              "statusCode" : "200",
+              "responseParameters" : {
+                "method.response.header.Access-Control-Allow-Methods" : "'GET,OPTIONS,PUT'",
+                "method.response.header.Access-Control-Allow-Headers" : "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+                "method.response.header.Access-Control-Allow-Origin" : "'*'"
+              }
+            }
+          },
+          "requestTemplates" : {
+            "application/json" : "{\"statusCode\": 200}"
+          },
+          "passthroughBehavior" : "when_no_match"
+        }
+      }
+    }
+  },
+  "securityDefinitions" : {
+    "api_key" : {
+      "type" : "apiKey",
+      "name" : "x-api-key",
+      "in" : "header"
+    }
+  },
+  "definitions" : {
+    "CreateSongRequest" : {
+      "type" : "object",
+      "required" : [ "author", "lyrics", "title" ],
+      "properties" : {
+        "title" : {
+          "type" : "string"
+        },
+        "author" : {
+          "type" : "string"
+        },
+        "lyrics" : {
+          "$ref" : "#/definitions/CreateSongRequestLyrics"
+        }
+      },
+      "title" : "CreateSongRequest"
+    },
+    "CreateSongRequestLyrics" : {
+      "type" : "array",
+      "items" : {
+        "$ref" : "#/definitions/CreateSongRequestLyricsItem"
+      }
+    },
+    "CreateSongRequestLyricsItem" : {
+      "type" : "object",
+      "properties" : {
+        "lyricType" : {
+          "type" : "string",
+          "enum" : [ "LYRIC_TYPE_VERSE", "LYRIC_TYPE_PRECHORUS", "LYRIC_TYPE_CHORUS", "LYRIC_TYPE_BRIDGE" ]
+        },
+        "verseNumber" : {
+          "type" : "number"
+        },
+        "lyrics" : {
+          "type" : "string"
+        }
+      }
+    },
+    "CreateSongbookRequest" : {
+      "type" : "object",
+      "required" : [ "fullName", "openToNewSongs" ],
+      "properties" : {
+        "fullName" : {
+          "type" : "string"
+        },
+        "staticMetadataLink" : {
+          "type" : "string"
+        },
+        "imageUrl" : {
+          "type" : "string"
+        },
+        "openToNewSongs" : {
+          "type" : "boolean"
+        }
+      },
+      "title" : "CreateSongbookRequest"
+    }
+  },
+  "x-amazon-apigateway-request-validators" : {
+    "Validate body" : {
+      "validateRequestParameters" : false,
+      "validateRequestBody" : true
+    }
+  }
+}
