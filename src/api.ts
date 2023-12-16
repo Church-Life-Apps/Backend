@@ -137,20 +137,15 @@ export const createSongbook = async (
 
 // Create Lyric API
 // TODO: Make this a "protected"/internal API
-const createLyrics = async (
-  songbookId: string,
-  songNumber: number,
-  lyrics: Lyric[]
-) => {
-  console.log(
-    `Create Lyric API Request received: ${songbookId} - ${songNumber} : ${JSON.stringify(
-      lyrics
-    )}`
-  );
-  lyrics.forEach(async (lyric) => {
+const createLyrics = async (songId: string, lyrics: Lyric[]) => {
+  const promises = [];
+  for (let i = 0; i < lyrics.length; i++) {
+    const lyric = lyrics[i];
+    lyric.songId = songId;
     validateInsertLyricRequest(lyric);
-    await songsService.insertLyricMethod(lyric);
-  });
+    promises.push(songsService.insertLyricMethod(lyric));
+  }
+  return Promise.all(promises);
 };
 
 // Create Song API
@@ -171,7 +166,7 @@ export const createSong = async (
   validateInsertSongRequest(song);
   try {
     await songsService.upsertSongMethod(song);
-    await createLyrics(bookId, number, request.lyrics);
+    await createLyrics(song.id, request.lyrics);
   } catch (e) {
     return formatErrorResponse(e);
   }

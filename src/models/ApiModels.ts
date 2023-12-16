@@ -3,6 +3,7 @@
  */
 
 export interface CreateSongRequest {
+  id: string; // uuid
   title: string;
   author: string;
   music: string;
