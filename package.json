@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "prebuild": "del /q dist",
-    "build": "tsc && esbuild src/index.ts --bundle --minify --sourcemap --platform=node --target=esnext --outfile=dist/index.js",
+    "build": "tsc && esbuild src/express-server.ts --bundle --minify --sourcemap --platform=node --target=esnext --outfile=dist/index.js",
     "postbuild": "cd dist && 7z a -tzip index.zip index.js*",
     "start": "node dist/index.js",
     "build-start": "npm run build && npm run start",
