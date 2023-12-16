@@ -29,9 +29,6 @@ const testPool = new Pool({
   user: process.env.TEST_PG_USER,
   password: process.env.TEST_PG_PASSWORD,
   database: process.env.TEST_PG_DATABASE,
-  ssl: {
-    ca: process.env.DB_CERT,
-  },
 });
 
 const songsDb = new SongsDb(testPool);
@@ -46,8 +43,6 @@ async function nukeDatabase() {
 }
 
 async function initializeDatabase() {
-  await nukeDatabase();
-
   await testPool.query(QUERY_CREATE_SONGBOOKS_TABLE);
   await testPool.query(QUERY_CREATE_SONGS_TABLE);
   await testPool.query(QUERY_CREATE_LYRIC_TYPE_ENUM);
