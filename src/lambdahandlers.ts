@@ -4,12 +4,13 @@ import { APIGatewayEvent, Handler } from "aws-lambda";
 import {
   createSong,
   createSongbook,
+  findSong,
   getSong,
   getSongbook,
   listSongbooks,
   listSongs,
 } from "./api";
-import { Songbook } from "./models/ApiModels";
+import { Songbook, toSearchRequest } from "./models/ApiModels";
 
 /**
  * Parses the songbook ID from an API Gateway Event's path parameters
@@ -66,4 +67,11 @@ export const createSongHandler: Handler = async (event: APIGatewayEvent) => {
   const creationRequest = JSON.parse(event.body!);
   const number = parseSongNumber(event);
   return createSong(songbookId, number, creationRequest);
+};
+
+export const searchSongsHandler: Handler = async (event: APIGatewayEvent) => {
+  console.log(`Search API Request received: ${event}`);
+  const requestJson = JSON.parse(event.body!);
+  const searchRequest = toSearchRequest(requestJson);
+  return findSong(searchRequest);
 };

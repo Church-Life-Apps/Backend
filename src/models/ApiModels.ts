@@ -2,18 +2,9 @@
  * Data Models for API Request and Response objects.
  */
 
-export interface CreateSongRequest {
-  id: string; // uuid
-  title: string;
-  author: string;
-  music: string;
-  lyrics: Lyric[];
-  presentationOrder: string;
-  imageUrl: string;
-  audioUrl: string;
-}
-
-// Data object for Songbooks APIs
+/**
+ * Data object for Songbooks APIs
+ */
 export interface Songbook {
   id: string;
   fullName: string;
@@ -22,7 +13,19 @@ export interface Songbook {
   openToNewSongs: boolean;
 }
 
-// Data object for Songs APIs
+/**
+ * HTTP request body model for Songbook creation
+ */
+export interface CreateSongbookRequest {
+  fullName: string;
+  staticMetadataLink: string;
+  imageUrl: string;
+  openToNewSongs: boolean;
+}
+
+/**
+ *   Data object for Songs APIs
+ */
 export interface Song {
   id: string; // uuid
   songbookId: string;
@@ -30,6 +33,19 @@ export interface Song {
   title: string;
   author: string;
   music: string;
+  presentationOrder: string;
+  imageUrl: string;
+  audioUrl: string;
+}
+
+/**
+ * HTTP Request body for creating a Song
+ */
+export interface CreateSongRequest {
+  title: string;
+  author: string;
+  music: string;
+  lyrics: Lyric[];
   presentationOrder: string;
   imageUrl: string;
   audioUrl: string;
