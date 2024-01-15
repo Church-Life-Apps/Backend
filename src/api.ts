@@ -31,6 +31,7 @@ import NotFoundError from "./errors/NotFoundError";
 const makeHeaders = () => ({
   "Content-Type": "application/json",
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, PUT, OPTIONS",
 });
 
 /**
@@ -105,13 +106,17 @@ export const listSongs = async (songbookId: string | undefined) => {
 
 // Get Song [With Lyrics] API
 export const getSong = async (songbookId: string, songNumber: number) => {
-  if (songbookId === undefined || songNumber === undefined) {
-    throw new NotFoundError();
+  try {
+    if (songbookId === undefined || songNumber === undefined) {
+      throw new NotFoundError();
+    }
+    validateGetSongRequest(songbookId, songNumber);
+    return formatSuccessResponse(
+      await songsService.getSongWithLyricsMethod(songbookId, songNumber)
+    );
+  } catch (e) {
+    return formatErrorResponse(e);
   }
-  validateGetSongRequest(songbookId, songNumber);
-  return formatSuccessResponse(
-    await songsService.getSongWithLyricsMethod(songbookId, songNumber)
-  );
 };
 
 // List Pending Songs API
@@ -127,8 +132,8 @@ export const createSongbook = async (
   console.log(`Create Songbook API Request received`);
   const songbook = toSongbook(createSongbookRequest);
   songbook.id = songbookId;
-  validateInsertSongbookRequest(songbook);
   try {
+    validateInsertSongbookRequest(songbook);
     await songsService.insertSongbookMethod(songbook);
   } catch (e) {
     return formatErrorResponse(e);
@@ -165,8 +170,8 @@ export const createSong = async (
   song.id = randomUUID();
   song.songbookId = bookId;
   song.number = number;
-  validateInsertSongRequest(song);
   try {
+    validateInsertSongRequest(song);
     await songsService.upsertSongMethod(song);
     await createLyrics(song.id, request.lyrics);
   } catch (e) {
@@ -189,22 +194,32 @@ export const createPendingSong = async (event: APIGatewayEvent) => {
 export const rejectPendingSong = async (event: APIGatewayEvent) => {
   console.log(`Reject Pending Song API Request received: ${event.path}`);
   const request = toRejectPendingSongRequest(event.body);
-  validateRejectPendingSongRequest(request);
-  await songsService.rejectPendingSongMethod(
-    request.pendingSong,
-    request.rejectionReason
-  );
+  try {
+    validateRejectPendingSongRequest(request);
+    await songsService.rejectPendingSongMethod(
+      request.pendingSong,
+      request.rejectionReason
+    );
+    return formatSuccessResponse();
+  } catch (e) {
+    return formatErrorResponse(e);
+  }
 };
 
 // TODO: Make this a "protected"/internal API
 export const acceptPendingSong = async (event: APIGatewayEvent) => {
   console.log(`Accept Pending Song API Request received: ${event.path}`);
   const request = toAcceptPendingSongRequest(event.body);
-  validateAcceptPendingSongRequest(request);
-  await songsService.acceptPendingSongMethod(
-    request.pendingSong,
-    request.acceptanceNote
-  );
+  try {
+    validateAcceptPendingSongRequest(request);
+    await songsService.acceptPendingSongMethod(
+      request.pendingSong,
+      request.acceptanceNote
+    );
+    return formatSuccessResponse();
+  } catch (e) {
+    return formatErrorResponse(e);
+  }
 };
 
 export const findSong = async (request: SearchRequest) => {
