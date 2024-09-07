@@ -261,12 +261,14 @@ export const QUERY_CREATE_PENDING_SONGS_TABLE = `
 
 export const QUERY_CREATE_INDEXES = `
   CREATE INDEX IF NOT EXISTS idx_search_lyrics_gin ON lyrics USING GIN(search_lyrics);
+  CREATE INDEX IF NOT EXISTS idx_lyrics_trgm ON lyrics USING gin (lyrics gin_trgm_ops);
   CREATE INDEX IF NOT EXISTS idx_songs_title_trgm ON songs USING gin (title gin_trgm_ops);
   CREATE INDEX IF NOT EXISTS idx_songs_author_trgm ON songs USING gin (author gin_trgm_ops);
 `;
 
 export const QUERY_DROP_INDEXES = `
   DROP INDEX IF EXISTS idx_search_lyrics_gin;
+  DROP INDEX IF EXISTS idx_lyrics_trgm;
   DROP INDEX IF EXISTS idx_songs_title_trgm;
   DROP INDEX IF EXISTS idx_songs_author_trgm;
 `;
