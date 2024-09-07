@@ -146,9 +146,12 @@ export function buildSearchSongByNumberQuery(
 }
 
 /**
- * 1. Find matches to the title and author columns. Order by title similarity, or number.
- * 2. Find matches to lyrics which match the searchText (requires trust in tsvector and ts_query)
- * 3. Put them together and return up to 50 (non-unique) rows. Upper logic will need to make sure each row is unique.
+ * Use a combination of trigram and textsearch to determine a list of up to 20 songs that contain or are similar to the search text
+ * 1. Find trgm similarity to the title and columns
+ * 2. Find trgm word_similarity to the lyrics column
+ * 3. Find the TextSearch (ts) rank against the lyrics
+ * 4. Combine above values to determine a score
+ * 5. Take the highest score for each song and sort high -> low
  */
 export function buildSearchSongsByTextQuery(
   searchText: string,
@@ -160,35 +163,30 @@ export function buildSearchSongsByTextQuery(
   }
   const lyricSearchText = formatForPostgresTsQuery(searchText);
   return `
-  WITH songs_table_query AS (
-    SELECT *
-    FROM songs s
+  WITH lyrics_table_query AS (
+    SELECT
+      *,
+      (similarity('${searchText}', s.title) +
+        similarity('${searchText}', s.author) +
+        word_similarity('${searchText}', l.lyrics) +
+        ts_rank(l.search_lyrics, to_tsquery('english', '${lyricSearchText}')))
+        AS likeness
+    FROM songs s LEFT JOIN lyrics l ON s.id = l.song_id
     WHERE (title ILIKE '%${searchText}%' OR title % '${searchText}' 
-    OR author ILIKE '%${searchText}%' OR author % '${searchText}')
-    ${songbookClause}
-    ORDER BY CASE
-      WHEN title ILIKE '%${searchText}%' OR title % '${searchText}' 
-      THEN similarity(title, '${searchText}') ELSE NULL
-      END DESC, 
-    number ASC
-  ),
-  lyrics_table_query AS (
-    SELECT s.* FROM songs s LEFT JOIN lyrics l ON s.id = l.song_id
-    WHERE l.search_lyrics @@ to_tsquery('english', '${lyricSearchText}')
-    ${songbookClause}
-    ORDER BY ts_rank(l.search_lyrics, to_tsquery('english', '${lyricSearchText}')) desc
+      OR author ILIKE '%${searchText}%' OR author % '$${searchText}'
+      OR l.search_lyrics @@ to_tsquery('english', '${lyricSearchText}') 
+      OR l.lyrics %> '${searchText}')
+      ${songbookClause}
+    ORDER BY (similarity('${searchText}', s.title)  + word_similarity('${searchText}', l.lyrics) + ts_rank(l.search_lyrics, to_tsquery('english', '${lyricSearchText}'))) desc
   )
-  SELECT *
-  FROM (
-    SELECT *
-    FROM songs_table_query
-    UNION ALL
-    SELECT *
-    FROM lyrics_table_query
-  ) AS combined_query
-    LIMIT 50;
+  SELECT id, songbook_id, number, title, author, music, presentation_order, image_url, audio_url, MAX(likeness) AS max_likeness
+  FROM lyrics_table_query
+  GROUP BY id, songbook_id, number, title, author, music, presentation_order, image_url, audio_url
+  ORDER BY max_likeness DESC, number ASC
+  LIMIT 20;
    `.trim();
 }
+
 // One-time queries below this line! Should only be called by TEST cases :)
 export const QUERY_CREATE_SONGBOOKS_TABLE = `
     CREATE TABLE IF NOT EXISTS songbooks (

@@ -411,7 +411,7 @@ describe("Test Database Tables", () => {
     const query4 = await songsDb.searchSongsByText("life out of deth", "");
     assertJsonEquality(query4, [song2]);
     const query5 = await songsDb.searchSongsByText("watcman nee", "");
-    assertJsonEquality(query5, [song4, song5, song2]);
+    assertJsonEquality(query5, [song5, song2, song4]);
     const query6 = await songsDb.searchSongsByText("spirit", "");
     assertJsonEquality(query6, [song5, testSong, song2]);
     const query7 = await songsDb.searchSongsByText("abiding", "");
