@@ -98,6 +98,13 @@ export const lambdaRequestHandler: Handler = async (
         default:
           return notFound;
       }
+    case "/songbooks/{songbookId}":
+      switch (event.httpMethod) {
+        case "GET":
+          return getSongbookHandler(event, context, callback);
+        default:
+          return notFound;
+      }
     case "/songbooks/{songbookId}/songs":
       switch (event.httpMethod) {
         case "GET":
