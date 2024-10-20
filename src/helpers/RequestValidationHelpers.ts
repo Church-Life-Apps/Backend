@@ -53,7 +53,7 @@ function validateSong(song: Song, prefix: string) {
   validateString(song.songbookId, `${prefix}songbookId`);
   validateIntegerGreaterThanZero(song.number, `${prefix}number`);
   validateString(song.title, `${prefix}title`);
-  validateString(song.author, `${prefix}author`);
+  // validateString(song.author, `${prefix}author`);
   validateString(song.presentationOrder, `${prefix}presentationOrder`);
 }
 /**
