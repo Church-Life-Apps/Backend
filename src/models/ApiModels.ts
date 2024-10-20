@@ -104,7 +104,7 @@ export function toSongbook(data: any): Songbook {
 }
 
 /**
- * Converts an object to a Songbook object.
+ * Converts an object to a Song object.
  */
 export function toSong(data: any): Song {
   return {
