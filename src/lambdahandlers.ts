@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { APIGatewayEvent, Handler } from "aws-lambda";
+import { APIGatewayEvent, Callback, Context, Handler } from "aws-lambda";
 
 import {
   createSong,
@@ -74,4 +74,47 @@ export const searchSongsHandler: Handler = async (event: APIGatewayEvent) => {
   const requestJson = JSON.parse(event.body!);
   const searchRequest = toSearchRequest(requestJson);
   return findSong(searchRequest);
+};
+
+export const lambdaRequestHandler: Handler = async (
+  event: APIGatewayEvent,
+  context: Context,
+  callback: Callback<any>
+) => {
+  console.log("Received request ", event);
+  const notFound = { statusCode: 404 };
+  switch (event.resource) {
+    case "/search":
+      switch (event.httpMethod) {
+        case "POST":
+          return searchSongsHandler(event, context, callback);
+        default:
+          return notFound;
+      }
+    case "/songbooks":
+      switch (event.httpMethod) {
+        case "GET":
+          return listSongbooksHandler(event, context, callback);
+        default:
+          return notFound;
+      }
+    case "/songbooks/{songbookId}/songs":
+      switch (event.httpMethod) {
+        case "GET":
+          return listSongsHandler(event, context, callback);
+        default:
+          return notFound;
+      }
+    case "/songbooks/{songbookId}/songs/{songNumber}":
+      switch (event.httpMethod) {
+        case "GET":
+          return getSongHandler(event, context, callback);
+        case "PUT":
+          return createSongHandler(event, context, callback);
+        default:
+          return notFound;
+      }
+    default:
+      return notFound;
+  }
 };
