@@ -20,6 +20,7 @@ import {
   SearchRequest,
   SearchResponse,
   Songbook,
+  SongWithLyrics,
   toAcceptPendingSongRequest,
   toPendingSong,
   toRejectPendingSongRequest,
@@ -166,10 +167,28 @@ export const createSong = async (
       request
     )}`
   );
+  let isCreation = false;
   const song = toSong(request);
-  song.id = randomUUID();
+
+  const existingSongResponse = await getSong(song.songbookId, song.number);
+  if (existingSongResponse.statusCode === 200) {
+    // A song already exists for this song number; confirm the IDs match
+    const existingSong = JSON.parse(
+      existingSongResponse.body as string
+    ) as SongWithLyrics;
+    if (existingSong.song.id !== song.id) {
+      return {
+        statusCode: 422,
+        body: "ID does not match existing song of this book and number combination",
+      };
+    }
+  } else {
+    isCreation = true;
+    song.id = randomUUID();
+  }
   song.songbookId = bookId;
   song.number = number;
+
   try {
     validateInsertSongRequest(song);
     await songsService.upsertSongMethod(song);
@@ -177,7 +196,10 @@ export const createSong = async (
   } catch (e) {
     return formatErrorResponse(e);
   }
-  return formatSuccessResponse(`/songbooks/${bookId}/songs/${number}`, 201);
+  return formatSuccessResponse(
+    `/songbooks/${bookId}/songs/${number}`,
+    isCreation ? 201 : 200
+  );
 };
 
 // Create Pending Song API
