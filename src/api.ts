@@ -184,7 +184,7 @@ export const createSong = async (
     }
   } else {
     isCreation = true;
-    song.id = randomUUID().toString();
+    song.id = randomUUID();
   }
   song.songbookId = bookId;
   song.number = number;
