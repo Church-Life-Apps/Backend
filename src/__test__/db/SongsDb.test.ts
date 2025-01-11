@@ -147,7 +147,7 @@ const testLyrics: DbLyric[] = [
 ];
 
 const testSongWithLyrics: DbSongWithLyrics = {
-  song: testSong,
+  ...testSong,
   lyrics: testLyrics,
 };
 
@@ -310,10 +310,8 @@ describe("Test Database Tables", () => {
     await songsDb.acceptPendingSong(updatedPendingSong);
 
     const expectedUpdated: DbSongWithLyrics = {
-      song: {
-        ...testSong,
-        title: newTitle,
-      },
+      ...testSong,
+      title: newTitle,
       lyrics: testLyrics.slice(0, 2),
     };
     const updatedSong = await songsDb.querySongWithLyrics(songbookId, number);
