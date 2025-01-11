@@ -1,7 +1,6 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import * as path from "path";
 import { Response } from "express-serve-static-core";
 import {
   validateAcceptPendingSongRequest,
@@ -51,15 +50,10 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.resolve(__dirname, "../web-build")));
 
 const PORT = process.env.PORT || 3000;
 
 const songsService = new SongsService();
-
-app.get("/hi", (req, res) => {
-  res.send("hello");
-});
 
 // List Songbooks API
 app.get("/api/songbooks", async (_req, res) => {
@@ -71,23 +65,22 @@ app.get("/api/songbooks", async (_req, res) => {
 });
 
 // List Songs API
-app.get("/api/songs", async (req, res) => {
+app.get("/api/songs/:songbookId", async (req, res) => {
   try {
-    const songbookId = (req.query.songbookId as string) ?? "";
+    const songbookId = (req.params.songbookId as string) ?? "";
     validateGetSongsRequest(songbookId);
-    res.send(await songsService.getSongsMethod(songbookId));
+    res.status(200).send(await songsService.getSongsMethod(songbookId));
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
 });
 
 // Get Song [With Lyrics] API
-app.get("/api/song", async (req, res) => {
+app.get("/api/songs/:songbookId/:songNumber", async (req, res) => {
   try {
-    const songbookId = (req.query.songbookId as string) ?? "";
-    const number = parseInt((req.query.number as string) ?? "", 10);
-    validateGetSongRequest(songbookId, number);
-    res.send(await songsService.getSongWithLyricsMethod(songbookId, number));
+    const songbookId = req.params.songbookId ?? "";
+    const number = parseInt(req.params.songNumber ?? "", 10);
+    res.send(await songsService.getSongWithLyrics(songbookId, number));
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
@@ -212,13 +205,8 @@ app.get("/api/search", async (req, res) => {
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
-  // TODO: Write search API which takes in a search string, and maybe other filters, and returns a list of songs which matches.
-});
-
-app.get("*", (_request, response) => {
-  response.sendFile(path.resolve(__dirname, "../web-build", "index.html"));
 });
 
 app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
+  console.log(`Listening on http://localhost:${PORT}`);
 });
