@@ -79,7 +79,7 @@ export default class SongsService {
     return this.songsDb.querySongsForSongbook(songbookId);
   }
 
-  async getSongWithLyricsMethod(
+  async getSongWithLyrics(
     songbookId: string,
     number: number
   ): Promise<SongWithLyrics> {

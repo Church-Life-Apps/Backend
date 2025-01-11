@@ -408,7 +408,7 @@ export default class SongsDb {
    */
   private mapDbSongWithLyric(rows: any): DbSongWithLyrics {
     return {
-      song: this.mapDbSong(rows[0]),
+      ...this.mapDbSong(rows[0]),
       lyrics: rows
         .filter((row: any) => this.mapDbLyric(row).lyrics.length > 0)
         .map((row: any) => this.mapDbLyric(row)),

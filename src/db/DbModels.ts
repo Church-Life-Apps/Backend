@@ -41,8 +41,7 @@ export interface DbLyric {
 }
 
 // Data object for joined Songs table with Lyrics table
-export interface DbSongWithLyrics {
-  song: DbSong;
+export interface DbSongWithLyrics extends DbSong {
   lyrics: DbLyric[];
 }
 

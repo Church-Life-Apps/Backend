@@ -68,8 +68,7 @@ export interface Lyric {
 }
 
 // Data object for joined Songs and Lyrics APIs
-export interface SongWithLyrics {
-  song: Song;
+export interface SongWithLyrics extends Song {
   lyrics: Lyric[];
 }
 

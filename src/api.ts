@@ -113,7 +113,7 @@ export const getSong = async (songbookId: string, songNumber: number) => {
     }
     validateGetSongRequest(songbookId, songNumber);
     return formatSuccessResponse(
-      await songsService.getSongWithLyricsMethod(songbookId, songNumber)
+      await songsService.getSongWithLyrics(songbookId, songNumber)
     );
   } catch (e) {
     return formatErrorResponse(e);
@@ -176,7 +176,7 @@ export const createSong = async (
     const existingSong = JSON.parse(
       existingSongResponse.body as string
     ) as SongWithLyrics;
-    if (existingSong.song.id !== song.id) {
+    if (existingSong.id !== song.id) {
       return {
         statusCode: 422,
         body: "ID does not match existing song of this book and number combination",
