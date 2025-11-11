@@ -215,3 +215,9 @@ export function toSearchRequest(data: any): SearchRequest {
 export interface SearchResponse {
   matchedSongs: Song[];
 }
+
+export interface Feedback {
+  title: string;
+  from: string;
+  message: string;
+}

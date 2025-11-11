@@ -9,8 +9,9 @@ import {
   getSongbook,
   listSongbooks,
   listSongs,
+  submitFeedback
 } from "./api";
-import { Songbook, toSearchRequest } from "./models/ApiModels";
+import { Feedback, Songbook, toSearchRequest } from "./models/ApiModels";
 
 /**
  * Parses the songbook ID from an API Gateway Event's path parameters
@@ -76,6 +77,12 @@ export const searchSongsHandler: Handler = async (event: APIGatewayEvent) => {
   return findSong(searchRequest);
 };
 
+const postFeedbackHandler: Handler = async (event: APIGatewayEvent) => {
+  console.log(`Post Feedback API Request received: ${event}`);
+  const feedbackRequest = JSON.parse(event.body!) as Feedback;
+  return submitFeedback(feedbackRequest);
+}
+
 export const lambdaRequestHandler: Handler = async (
   event: APIGatewayEvent,
   context: Context,
@@ -109,6 +116,13 @@ export const lambdaRequestHandler: Handler = async (
       switch (event.httpMethod) {
         case "GET":
           return listSongsHandler(event, context, callback);
+        default:
+          return notFound;
+      }
+    case "/feedback":
+      switch (event.httpMethod) {
+        case "POST":
+          return postFeedbackHandler(event, context, callback);
         default:
           return notFound;
       }
