@@ -26,6 +26,7 @@ import {
   toSong,
   toSongbook,
 } from "./models/ApiModels";
+import { submitFeedback } from "./api";
 
 /**
  * Handles API errors
@@ -205,6 +206,12 @@ app.get("/api/search", async (req, res) => {
   } catch (e: any) {
     handleErrorsAndReturn(e, res);
   }
+});
+
+app.post("/api/feedback", async (req, res) => {
+  console.log(`Feedback API Request received: ${req.path}`);
+  const response = await submitFeedback(req.body);
+  res.send(response);
 });
 
 app.listen(PORT, () => {
