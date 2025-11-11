@@ -269,6 +269,7 @@ export const findSong = async (request: SearchRequest) => {
 
 export const submitFeedback = async (request: Feedback) => {
   try {
+    console.log(`Submit Feedback API Request received`);
     validateSubmitFeedbackRequest(request);
     await feedbackService.submit(request);
     return formatSuccessResponse();

@@ -6,6 +6,7 @@ const REPO_NAME = 'SongsV2';
 
 export default class FeedbackService {
   async submit(feedback: Feedback): Promise<void> {
+    console.log('Submitting feedback to GitHub repository issues.');
     const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/issues`, {
       method: 'POST',
       headers: {
@@ -15,7 +16,11 @@ export default class FeedbackService {
       body: JSON.stringify({ title: feedback.title, body: `> ${feedback.message}\n\n— ${feedback.from}` })
     });
 
+    console.log('GitHub API response status:', response.status);
+
     if (!response.ok) {
+      const errorData = await response.json();
+      console.error('GitHub API Error:', errorData);
       throw new Error("Failed to publish feedback to github.");
     }
   } 
