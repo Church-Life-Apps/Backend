@@ -274,6 +274,7 @@ export const submitFeedback = async (request: Feedback) => {
     await feedbackService.submit(request);
     return formatSuccessResponse();
   } catch (e) {
+    console.error(e);
     return formatErrorResponse(e);
   }
 }
