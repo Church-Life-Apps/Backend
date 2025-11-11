@@ -84,7 +84,7 @@ Resources:
           PG_DATABASE: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:dbname}}'
           PG_USER: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:username}}'
           PG_PASSWORD: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:password}}'
-          GITHUB_TOKEN: '{{resolve:secretsmanager:/church-life-apps/github:SecretString:token}}'
+          GITHUB_TOKEN: '{{resolve:secretsmanager:church-life-apps/github:SecretString:token}}'
       Role: !GetAtt SongsAndHymnsLambdaRole.Arn
       VpcConfig:
         SecurityGroupIds: 
