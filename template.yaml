@@ -58,7 +58,6 @@ Resources:
             Action:
               - sts:AssumeRole
 
-  # This is a Lambda function config associated with the source code: get-all-items.js
   SongsAndHymnsApiLambdaFunction:
     Type: AWS::Serverless::Function
     Metadata: # Manage esbuild properties
@@ -85,6 +84,7 @@ Resources:
           PG_DATABASE: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:dbname}}'
           PG_USER: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:username}}'
           PG_PASSWORD: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:password}}'
+          GITHUB_TOKEN: '{{resolve:secretsmanager:/church-life-apps/github:SecretString:token}}'
       Role: !GetAtt SongsAndHymnsLambdaRole.Arn
       VpcConfig:
         SecurityGroupIds: 

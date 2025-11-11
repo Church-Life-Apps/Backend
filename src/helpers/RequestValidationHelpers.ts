@@ -8,6 +8,7 @@ import {
   AcceptPendingSongRequest,
   RejectPendingSongRequest,
   SearchRequest,
+  Feedback,
 } from "../models/ApiModels";
 
 /**
@@ -148,4 +149,10 @@ export function validateGetSongsRequest(songbookId: string) {
 export function validateGetSongRequest(songbookId: string, number: number) {
   validateString(songbookId, "songbookId");
   validateIntegerGreaterThanZero(number, "number");
+}
+
+export function validateSubmitFeedbackRequest(request: Feedback) {
+  validateString(request.from, "from");
+  validateString(request.title, "title");
+  validateString(request.message, "message");
 }

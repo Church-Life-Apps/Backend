@@ -10,12 +10,14 @@ import {
   validateInsertSongRequest,
   validateRejectPendingSongRequest,
   validateSearchRequest,
+  validateSubmitFeedbackRequest,
 } from "./helpers/RequestValidationHelpers";
 import SongsService from "./services/SongsService";
 import { DatabaseError, ValidationError } from "./helpers/ErrorHelpers";
 
 import {
   CreateSongRequest,
+  Feedback,
   Lyric,
   SearchRequest,
   SearchResponse,
@@ -28,6 +30,7 @@ import {
   toSongbook,
 } from "./models/ApiModels";
 import NotFoundError from "./errors/NotFoundError";
+import FeedbackService from "./services/FeedbackService";
 
 const makeHeaders = () => ({
   "Content-Type": "application/json",
@@ -74,6 +77,7 @@ const formatSuccessResponse = (body: any = undefined, statusCode = 200) => ({
 });
 
 const songsService = new SongsService();
+const feedbackService = new FeedbackService();
 
 // List Songbooks API
 export const listSongbooks = async () => {
@@ -261,5 +265,14 @@ export const findSong = async (request: SearchRequest) => {
   } catch (e) {
     return formatErrorResponse(e);
   }
-  // TODO: Write search API which takes in a search string, and maybe other filters, and returns a list of songs which matches.
 };
+
+export const submitFeedback = async (request: Feedback) => {
+  try {
+    validateSubmitFeedbackRequest(request);
+    await feedbackService.submit(request);
+    return formatSuccessResponse();
+  } catch (e) {
+    return formatErrorResponse(e);
+  }
+}
