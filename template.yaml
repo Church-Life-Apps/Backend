@@ -73,7 +73,7 @@ Resources:
       Description: Production Songs & Hymns API
       CodeUri: .
       Handler: src/lambdahandlers.lambdaRequestHandler
-      Runtime: nodejs20.x
+      Runtime: nodejs24.x
       Architectures:
       - x86_64
       MemorySize: 128
