@@ -84,7 +84,6 @@ Resources:
           PG_DATABASE: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:dbname}}'
           PG_USER: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:username}}'
           PG_PASSWORD: !Sub '{{resolve:secretsmanager:${Environment}/songs-and-hymns/db-api-user-credentials:SecretString:password}}'
-          GITHUB_TOKEN: '{{resolve:secretsmanager:church-life-apps/github:SecretString:token}}'
       Role: !GetAtt SongsAndHymnsLambdaRole.Arn
       VpcConfig:
         SecurityGroupIds: 
@@ -92,3 +91,27 @@ Resources:
         SubnetIds:
           - subnet-091dc4a61d1cf1bba
           - subnet-0d17204e657654d55
+
+  FeedbackLambdaFunction:
+    Type: AWS::Serverless::Function
+    Metadata: # Manage esbuild properties
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2022"
+        Sourcemap: true
+        EntryPoints: 
+        - src/lambdahandlers.ts
+    Properties:
+      FunctionName: !Sub SongsHymns-Feedback-${Environment}
+      Description: Feedback handler for Songs & Hymns API
+      CodeUri: .
+      Handler: src/lambdahandlers.postFeedbackHandler
+      Runtime: nodejs24.x
+      Architectures:
+      - x86_64
+      MemorySize: 128
+      Role: !GetAtt SongsAndHymnsLambdaRole.Arn
+      Environment:
+        Variables:
+          GITHUB_TOKEN: '{{resolve:secretsmanager:church-life-apps/github:SecretString:token}}'
