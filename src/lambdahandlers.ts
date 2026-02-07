@@ -9,7 +9,7 @@ import {
   getSongbook,
   listSongbooks,
   listSongs,
-  submitFeedback
+  submitFeedback,
 } from "./api";
 import { Feedback, Songbook, toSearchRequest } from "./models/ApiModels";
 
@@ -35,34 +35,32 @@ const parseSongNumber = (event: APIGatewayEvent) => {
   return parseInt(number, 10);
 };
 
-export const listSongbooksHandler: Handler = async () => listSongbooks();
+export const listSongbooksHandler = async () => listSongbooks();
 
-export const getSongbookHandler: Handler = async (event: APIGatewayEvent) =>
+export const getSongbookHandler = async (event: APIGatewayEvent) =>
   getSongbook(parseSongbookId(event));
 
-export const createSongbookHandler: Handler = async (
-  event: APIGatewayEvent
-) => {
+export const createSongbookHandler = async (event: APIGatewayEvent) => {
   console.log(event);
   const creationRequest = JSON.parse(event.body!) as Songbook;
   const songbookId = parseSongbookId(event);
   return createSongbook(songbookId, creationRequest);
 };
 
-export const listSongsHandler: Handler = async (event: APIGatewayEvent) => {
+export const listSongsHandler = async (event: APIGatewayEvent) => {
   console.log(event);
   const songbookId = parseSongbookId(event);
   return listSongs(songbookId);
 };
 
-export const getSongHandler: Handler = async (event: APIGatewayEvent) => {
+export const getSongHandler = async (event: APIGatewayEvent) => {
   console.log(event);
   const songbookId = parseSongbookId(event);
   const songNumber = parseSongNumber(event);
   return getSong(songbookId, songNumber);
 };
 
-export const createSongHandler: Handler = async (event: APIGatewayEvent) => {
+export const createSongHandler = async (event: APIGatewayEvent) => {
   console.log(event);
   const songbookId = parseSongbookId(event);
   const creationRequest = JSON.parse(event.body!);
@@ -70,68 +68,66 @@ export const createSongHandler: Handler = async (event: APIGatewayEvent) => {
   return createSong(songbookId, number, creationRequest);
 };
 
-export const searchSongsHandler: Handler = async (event: APIGatewayEvent) => {
+export const searchSongsHandler = async (event: APIGatewayEvent) => {
   console.log(`Search API Request received: ${event}`);
   const requestJson = JSON.parse(event.body!);
   const searchRequest = toSearchRequest(requestJson);
   return findSong(searchRequest);
 };
 
-const postFeedbackHandler: Handler = async (event: APIGatewayEvent) => {
+const postFeedbackHandler = async (event: APIGatewayEvent) => {
   console.log(`Post Feedback API Request received: ${event}`);
   const feedbackRequest = JSON.parse(event.body!) as Feedback;
   return submitFeedback(feedbackRequest);
-}
+};
 
-export const lambdaRequestHandler: Handler = async (
-  event: APIGatewayEvent,
-  context: Context,
-  callback: Callback<any>
-) => {
+export const lambdaRequestHandler = async (
+  event: APIGatewayEvent
+): Promise<any> => {
   console.log("Received request ", event);
   const notFound = { statusCode: 404 };
   switch (event.resource) {
     case "/search":
       switch (event.httpMethod) {
         case "POST":
-          return searchSongsHandler(event, context, callback);
+          return searchSongsHandler(event);
         default:
           return notFound;
       }
     case "/songbooks":
       switch (event.httpMethod) {
         case "GET":
-          return listSongbooksHandler(event, context, callback);
+          return listSongbooksHandler();
         default:
           return notFound;
       }
     case "/songbooks/{songbookId}":
       switch (event.httpMethod) {
         case "GET":
-          return getSongbookHandler(event, context, callback);
+          return getSongbookHandler(event);
         default:
           return notFound;
       }
     case "/songbooks/{songbookId}/songs":
       switch (event.httpMethod) {
         case "GET":
-          return listSongsHandler(event, context, callback);
+          return listSongsHandler(event);
         default:
           return notFound;
       }
     case "/feedback":
       switch (event.httpMethod) {
         case "POST":
-          return postFeedbackHandler(event, context, callback);
+          return postFeedbackHandler(event);
         default:
           return notFound;
       }
     case "/songbooks/{songbookId}/songs/{songNumber}":
       switch (event.httpMethod) {
         case "GET":
-          return getSongHandler(event, context, callback);
+          return getSongHandler(event);
         case "PUT":
-          return createSongHandler(event, context, callback);
+          return createSongHandler(event);
         default:
           return notFound;
       }

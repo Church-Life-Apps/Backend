@@ -277,4 +277,4 @@ export const submitFeedback = async (request: Feedback) => {
     console.error(e);
     return formatErrorResponse(e);
   }
-}
+};
