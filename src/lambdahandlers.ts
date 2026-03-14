@@ -84,8 +84,8 @@ const postFeedbackHandler = async (event: APIGatewayEvent) => {
 
 const listSongsByAuthorHandler = async (event: APIGatewayEvent) => {
   console.log(`Get Author API Request received: ${event}`);
-  const authorName = event.pathParameters?.authorName;
-  if (authorName === undefined) {
+  const authorName = decodeURIComponent(event.pathParameters?.authorName ?? "");
+  if (authorName === undefined || authorName.trim() === "") {
     throw new Error("Author name was undefined");
   }
   return listSongsByAuthor(authorName);
