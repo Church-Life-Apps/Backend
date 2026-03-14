@@ -82,7 +82,7 @@ const postFeedbackHandler = async (event: APIGatewayEvent) => {
   return submitFeedback(feedbackRequest);
 };
 
-const getAuthorHandler = async (event: APIGatewayEvent) => {
+const listSongsByAuthorHandler = async (event: APIGatewayEvent) => {
   console.log(`Get Author API Request received: ${event}`);
   const authorName = event.pathParameters?.authorName;
   if (authorName === undefined) {
@@ -141,10 +141,10 @@ export const lambdaRequestHandler = async (
         default:
           return notFound;
       }
-    case "/authors/{authorName}":
+    case "/authors/{authorName}/songs":
       switch (event.httpMethod) {
         case "GET":
-          return getAuthorHandler(event);
+          return listSongsByAuthorHandler(event);
         default:
           return notFound;
       }
