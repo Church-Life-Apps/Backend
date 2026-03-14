@@ -94,6 +94,13 @@ export function buildGetSongWithLyricsQuery(
     `.trim();
 }
 
+export function buildGetSongsByAuthorQuery(authorName: string): string {
+  return `SELECT * 
+          FROM songs
+          WHERE author ILIKE '%${authorName}%'
+          ORDER BY songbook_id ASC, number ASC`.trim();
+}
+
 export function buildInsertPendingSongQuery(
   id: string,
   songbookId: string,

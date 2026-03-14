@@ -96,4 +96,8 @@ export default class SongsService {
     }
     return this.songsDb.searchSongsByText(searchText, songbook);
   }
+
+  async listByAuthor(authorName: string): Promise<Song[]> {
+    return this.songsDb.querySongsByAuthor(authorName);
+  }
 }

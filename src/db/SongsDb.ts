@@ -30,6 +30,7 @@ import {
   buildSearchSongByNumberQuery,
   buildSearchSongsByTextQuery,
   buildFindSongbookQuery,
+  buildGetSongsByAuthorQuery,
 } from "./DbQueries";
 import NotFoundError from "../errors/NotFoundError";
 
@@ -83,6 +84,17 @@ export default class SongsDb {
     return this.queryDb(buildGetSongsForSongbookQuery(songbookId)).then(
       (rows) => rows.map((row) => this.mapDbSong(row))
     );
+  }
+
+  /**
+   * Queries for songs with a specified author name.
+   * Performs a case-insensitive search and matches partial author names as well.
+   * @param authorName Name of the author to find
+   * @returns 
+   */
+  async querySongsByAuthor(authorName: string): Promise<DbSong[]> {
+    return this.queryDb(buildGetSongsByAuthorQuery(authorName))
+      .then((rows) => rows.map((row) => this.mapDbSong(row)));
   }
 
   /**

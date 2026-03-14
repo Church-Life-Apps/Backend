@@ -9,6 +9,7 @@ import {
   getSongbook,
   listSongbooks,
   listSongs,
+  listSongsByAuthor,
   submitFeedback,
 } from "./api";
 import { Feedback, Songbook, toSearchRequest } from "./models/ApiModels";
@@ -81,6 +82,15 @@ const postFeedbackHandler = async (event: APIGatewayEvent) => {
   return submitFeedback(feedbackRequest);
 };
 
+const getAuthorHandler = async (event: APIGatewayEvent) => {
+  console.log(`Get Author API Request received: ${event}`);
+  const authorName = event.pathParameters?.authorName;
+  if (authorName === undefined) {
+    throw new Error("Author name was undefined");
+  }
+  return listSongsByAuthor(authorName);
+};
+
 export const lambdaRequestHandler = async (
   event: APIGatewayEvent
 ): Promise<any> => {
@@ -128,6 +138,13 @@ export const lambdaRequestHandler = async (
           return getSongHandler(event);
         case "PUT":
           return createSongHandler(event);
+        default:
+          return notFound;
+      }
+    case "/authors/{authorName}":
+      switch (event.httpMethod) {
+        case "GET":
+          return getAuthorHandler(event);
         default:
           return notFound;
       }

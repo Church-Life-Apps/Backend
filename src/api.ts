@@ -278,3 +278,22 @@ export const submitFeedback = async (request: Feedback) => {
     return formatErrorResponse(e);
   }
 };
+
+/**
+ * Lists songs by a specified author name.
+ * @param authorName The name of the author to use for searching.
+ * @returns The list of songs written by the requested author
+ */
+export const listSongsByAuthor = async (authorName: string) => {
+  try {
+    console.log(`Get Author API Request received for author: ${authorName}`);
+    const author = await songsService.listByAuthor(authorName);
+    if (author === undefined) {
+      throw new NotFoundError();
+    }
+    return formatSuccessResponse(author);
+  } catch (e) {
+    console.error(e);
+    return formatErrorResponse(e);
+  }
+}
