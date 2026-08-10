@@ -95,7 +95,7 @@ export default class SongsDb {
     return this.queryDb(buildGetSongWithLyricsQuery(songbookId, number)).then(
       (rows) => {
         if (rows.length <= 0) {
-          throw new DatabaseError(
+          throw new NotFoundError(
             `Song not found for ${songbookId}: ${number}`
           );
         }
@@ -187,6 +187,75 @@ export default class SongsDb {
       }
       throw new DatabaseError("Unable to insert lyric");
     });
+  }
+
+  /**
+   * Atomically replaces one song and its complete lyric set.
+   *
+   * This is the write primitive for canonical data synchronization. Deleting
+   * the old lyric rows is required because an upsert alone leaves sections
+   * that were removed from the canonical source behind.
+   */
+  async replaceSongWithLyrics(
+    song: DbSong,
+    lyrics: DbLyric[]
+  ): Promise<DbSongWithLyrics> {
+    const client: PoolClient = await this.pool.connect();
+    try {
+      await this.queryWithLog("BEGIN", client);
+      const songResponse = await this.queryWithLog(
+        buildUpsertSongQuery(
+          song.id,
+          song.songbookId,
+          song.number,
+          formatForDbEntry(song.title),
+          formatForDbEntry(song.author),
+          formatForDbEntry(song.music),
+          formatForDbEntry(song.presentationOrder),
+          song.imageUrl,
+          song.audioUrl
+        ),
+        client
+      );
+      if (songResponse.rows.length !== 1) {
+        throw new DatabaseError("Unable to replace song.");
+      }
+
+      const updatedSong = this.mapDbSong(songResponse.rows[0]);
+      await this.queryWithLog(
+        buildDeleteLyricsForSongQuery(updatedSong.id),
+        client
+      );
+
+      const updatedLyrics: DbLyric[] = [];
+      // Keep writes serial on this transaction's single PostgreSQL client.
+      // eslint-disable-next-line no-restricted-syntax
+      for (const lyric of lyrics) {
+        // eslint-disable-next-line no-await-in-loop
+        const lyricResponse = await this.queryWithLog(
+          buildUpsertLyricQuery(
+            updatedSong.id,
+            lyric.lyricType,
+            lyric.verseNumber,
+            formatForDbEntry(lyric.lyrics),
+            formatForDbEntry(formatForDbSearchColumn(lyric.lyrics))
+          ),
+          client
+        );
+        if (lyricResponse.rows.length !== 1) {
+          throw new DatabaseError("Unable to replace song lyric.");
+        }
+        updatedLyrics.push(this.mapDbLyric(lyricResponse.rows[0]));
+      }
+
+      await this.queryWithLog("COMMIT", client);
+      return { ...updatedSong, lyrics: updatedLyrics };
+    } catch (e: any) {
+      await this.queryWithLog("ROLLBACK", client);
+      throw e;
+    } finally {
+      client.release();
+    }
   }
 
   /**
@@ -284,7 +353,10 @@ export default class SongsDb {
       );
 
       // Insert new lyrics for this song
-      pendingSong.lyrics.forEach(async (lyric) => {
+      // Keep writes serial on this transaction's single PostgreSQL client.
+      // eslint-disable-next-line no-restricted-syntax
+      for (const lyric of pendingSong.lyrics) {
+        // eslint-disable-next-line no-await-in-loop
         await this.queryWithLog(
           buildUpsertLyricQuery(
             updatedSongId,
@@ -295,7 +367,7 @@ export default class SongsDb {
           ),
           client
         );
-      });
+      }
 
       // If all went well, then commit the transaction.
       await this.queryWithLog("COMMIT", client);

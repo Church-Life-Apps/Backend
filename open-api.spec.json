@@ -306,7 +306,7 @@
       "properties" : {
         "lyricType" : {
           "type" : "string",
-          "enum" : [ "LYRIC_TYPE_VERSE", "LYRIC_TYPE_PRECHORUS", "LYRIC_TYPE_CHORUS", "LYRIC_TYPE_BRIDGE" ]
+          "enum" : [ "LYRIC_TYPE_VERSE", "LYRIC_TYPE_PRECHORUS", "LYRIC_TYPE_CHORUS", "LYRIC_TYPE_BRIDGE", "LYRIC_TYPE_TAG", "LYRIC_TYPE_ENDING", "LYRIC_TYPE_INTRO" ]
         },
         "verseNumber" : {
           "type" : "number"

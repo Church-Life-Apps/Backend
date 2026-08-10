@@ -18,7 +18,6 @@ import { DatabaseError, ValidationError } from "./helpers/ErrorHelpers";
 import {
   CreateSongRequest,
   Feedback,
-  Lyric,
   SearchRequest,
   SearchResponse,
   Songbook,
@@ -146,19 +145,6 @@ export const createSongbook = async (
   return formatSuccessResponse(`/songbooks/${songbook.id}`, 201);
 };
 
-// Create Lyric API
-// TODO: Make this a "protected"/internal API
-const createLyrics = async (songId: string, lyrics: Lyric[]) => {
-  const promises = [];
-  for (let i = 0; i < lyrics.length; i++) {
-    const lyric = lyrics[i];
-    lyric.songId = songId;
-    validateInsertLyricRequest(lyric);
-    promises.push(songsService.insertLyricMethod(lyric));
-  }
-  return Promise.all(promises);
-};
-
 // Create Song API
 // TODO: Make this a "protected"/internal API
 export const createSong = async (
@@ -173,30 +159,32 @@ export const createSong = async (
   );
   let isCreation = false;
   const song = toSong(request);
-
-  const existingSongResponse = await getSong(song.songbookId, song.number);
-  if (existingSongResponse.statusCode === 200) {
-    // A song already exists for this song number; confirm the IDs match
-    const existingSong = JSON.parse(
-      existingSongResponse.body as string
-    ) as SongWithLyrics;
-    if (existingSong.id !== song.id) {
-      return {
-        statusCode: 422,
-        body: "ID does not match existing song of this book and number combination",
-      };
-    }
-  } else {
-    isCreation = true;
-    song.id = randomUUID();
-  }
   song.songbookId = bookId;
   song.number = number;
 
+  const existingSongResponse = await getSong(bookId, number);
+  if (existingSongResponse.statusCode === 200) {
+    const existingSong = JSON.parse(
+      existingSongResponse.body as string
+    ) as SongWithLyrics;
+    song.id = existingSong.id;
+  } else if (existingSongResponse.statusCode === 404) {
+    isCreation = true;
+    song.id = randomUUID();
+  } else {
+    return existingSongResponse;
+  }
+
   try {
     validateInsertSongRequest(song);
-    await songsService.upsertSongMethod(song);
-    await createLyrics(song.id, request.lyrics);
+    const lyrics = request.lyrics.map((lyric) => ({
+      ...lyric,
+      songId: song.id,
+    }));
+    lyrics.forEach((lyric) => {
+      validateInsertLyricRequest(lyric);
+    });
+    await songsService.replaceSongMethod(song, lyrics);
   } catch (e) {
     return formatErrorResponse(e);
   }

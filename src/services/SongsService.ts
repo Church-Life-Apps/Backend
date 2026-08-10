@@ -29,6 +29,13 @@ export default class SongsService {
     return this.songsDb.upsertLyric(lyric);
   }
 
+  async replaceSongMethod(
+    song: Song,
+    lyrics: Lyric[]
+  ): Promise<SongWithLyrics> {
+    return this.songsDb.replaceSongWithLyrics(song, lyrics);
+  }
+
   async insertPendingSongMethod(
     pendingSong: PendingSong
   ): Promise<PendingSong> {

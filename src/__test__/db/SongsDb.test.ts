@@ -245,6 +245,48 @@ describe("Test Database Tables", () => {
     );
   });
 
+  test(`Atomically Replace Song and Complete Lyric Set`, async () => {
+    await songsDb.insertSongbook(testSongbook);
+    await songsDb.upsertSong(testSong);
+    await songsDb.upsertLyric(testLyrics[0]);
+    await songsDb.upsertLyric(testLyrics[1]);
+
+    const replacementLyrics: DbLyric[] = [
+      {
+        songId,
+        lyricType: LyricType.LYRIC_TYPE_TAG,
+        verseNumber: 1,
+        lyrics: "Replacement tag",
+      },
+      {
+        songId,
+        lyricType: LyricType.LYRIC_TYPE_ENDING,
+        verseNumber: 1,
+        lyrics: "Replacement ending",
+      },
+      {
+        songId,
+        lyricType: LyricType.LYRIC_TYPE_INTRO,
+        verseNumber: 1,
+        lyrics: "Replacement intro",
+      },
+    ];
+    const replaced = await songsDb.replaceSongWithLyrics(
+      testSongUpdated,
+      replacementLyrics
+    );
+
+    assertJsonEquality(replaced, {
+      ...testSongUpdated,
+      lyrics: replacementLyrics,
+    });
+    const queried = await songsDb.querySongWithLyrics(songbookId, number);
+    assertJsonEquality(queried, {
+      ...testSongUpdated,
+      lyrics: replacementLyrics,
+    });
+  });
+
   test(`Insert Pending Song and Get Pending Songs Functions`, async () => {
     await songsDb.insertSongbook(testSongbook);
     const inserted = await songsDb.insertPendingSong(testPendingSong);

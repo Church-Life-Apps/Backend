@@ -222,7 +222,10 @@ export const QUERY_CREATE_LYRIC_TYPE_ENUM = `
         'LYRIC_TYPE_VERSE',
         'LYRIC_TYPE_PRECHORUS',
         'LYRIC_TYPE_CHORUS',
-        'LYRIC_TYPE_BRIDGE'
+        'LYRIC_TYPE_BRIDGE',
+        'LYRIC_TYPE_TAG',
+        'LYRIC_TYPE_ENDING',
+        'LYRIC_TYPE_INTRO'
     );
 `.trim();
 
